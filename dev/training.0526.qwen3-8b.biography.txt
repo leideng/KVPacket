@@ -1,0 +1,275 @@
+(kv-packet) root@dedicated-developjob-kvbridge-ldeng-thdz4-7ccbd674f9-pcw98:/deng.lei2@ai.com/code/kvbridge/KVPacket# python run_train_filler.py packet_wrapper_config/qwen_3_8b/biography/8_8.json 
+Loaded 1 training configurations.
+ - packet_wrapper_config/qwen_3_8b/biography/8_8.json
+Training configuration:
+{
+│   'total_epoch': 30,
+│   'gen_batch_size': 64,
+│   'batch_size': 64,
+│   'forward_batch_size': 8,
+│   'header_len': 8,
+│   'trailer_len': 8,
+│   'dtype': None,
+│   'use_logits': True,
+│   'use_cache': False,
+│   'model': {
+│   │   'model_path': '/public/models/Qwen3-8B',
+│   │   'dtype': 'bfloat16',
+│   │   'device': 'cuda:0',
+│   │   'generation_kwargs': {'max_new_tokens': 64, 'stop_strings': ['<|im_end|>'], 'do_sample': False, 'use_cache': True}
+│   },
+│   'cache_device': 'cuda:0',
+│   'cache_path': None,
+│   'seed': 42,
+│   'save_path': './packet_wrapper/qwen_3_8b/biography',
+│   'file_name': '8_8.pt',
+│   'ckpt_epoch': 0,
+│   'opt_config': {'lr': 0.0005, 'weight_decay': 0.0},
+│   'scheduler_config': {'start_factor': 1.0, 'end_factor': 0.0},
+│   'data_configs': [
+│   │   {
+│   │   │   'dataset_name': 'biography',
+│   │   │   'num_data_strs': 2,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 64,
+│   │   │   'subset': '10k',
+│   │   │   'split': 'train',
+│   │   │   'seed': 0,
+│   │   │   'data_kwargs': {'question_type': 'QA', 'cache_dataset': True},
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   },
+│   │   {
+│   │   │   'dataset_name': 'biography',
+│   │   │   'num_data_strs': 3,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 64,
+│   │   │   'subset': '10k',
+│   │   │   'split': 'train',
+│   │   │   'seed': 1,
+│   │   │   'data_kwargs': {'question_type': 'QA', 'cache_dataset': True},
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   },
+│   │   {
+│   │   │   'dataset_name': 'biography',
+│   │   │   'num_data_strs': 5,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 64,
+│   │   │   'subset': '10k',
+│   │   │   'split': 'train',
+│   │   │   'seed': 2,
+│   │   │   'data_kwargs': {'question_type': 'QA', 'cache_dataset': True},
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   },
+│   │   {
+│   │   │   'dataset_name': 'biography',
+│   │   │   'num_data_strs': 7,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 64,
+│   │   │   'subset': '10k',
+│   │   │   'split': 'train',
+│   │   │   'seed': 3,
+│   │   │   'data_kwargs': {'question_type': 'QA', 'cache_dataset': True},
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   }
+│   ],
+│   'resume': False,
+│   'resume_epoch': None
+}
+Loading weights: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 399/399 [00:09<00:00, 40.93it/s]
+Embedding mean: 1.508e-05, std: 2.209e-02
+Downloading readme: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 6.81k/6.81k [00:00<00:00, 13.6kB/s]
+Downloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 81.9M/81.9M [00:04<00:00, 17.3MB/s]
+Downloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15.3M/15.3M [00:01<00:00, 11.0MB/s]
+Generating train split: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10000/10000 [00:00<00:00, 102310.08 examples/s]
+Generating test split: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10000/10000 [00:00<00:00, 277305.69 examples/s]
+Filtered dataset from 10000 to 9904 items
+Total training samples: 256
+on 0: The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Building generation cache |████████████████████████████████████████| 256/256 [100%] in 17.8s (12.00/s) 
+Epoch 1/30
+on 64: eval tokens 4096, loss 0.8272, lr 4.958e-04
+on 128: eval tokens 4096, loss 0.7678, lr 4.917e-04
+on 192: eval tokens 4096, loss 0.7034, lr 4.875e-04
+on 256: eval tokens 4096, loss 0.6637, lr 4.833e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.8s (14.16/s) 
+Epoch 2/30
+on 64: eval tokens 4096, loss 0.6193, lr 4.792e-04
+on 128: eval tokens 4096, loss 0.5196, lr 4.750e-04
+on 192: eval tokens 4096, loss 0.5460, lr 4.708e-04
+on 256: eval tokens 4096, loss 0.4613, lr 4.667e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.2s (14.66/s) 
+Epoch 3/30
+on 64: eval tokens 4096, loss 0.4394, lr 4.625e-04
+on 128: eval tokens 4096, loss 0.4510, lr 4.583e-04
+on 192: eval tokens 4096, loss 0.4194, lr 4.542e-04
+on 256: eval tokens 4096, loss 0.4168, lr 4.500e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.2s (14.62/s) 
+Epoch 4/30
+on 64: eval tokens 4096, loss 0.4217, lr 4.458e-04
+on 128: eval tokens 4096, loss 0.3721, lr 4.417e-04
+on 192: eval tokens 4096, loss 0.3838, lr 4.375e-04
+on 256: eval tokens 4096, loss 0.3353, lr 4.333e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.4s (14.52/s) 
+Epoch 5/30
+on 64: eval tokens 4096, loss 0.3619, lr 4.292e-04
+on 128: eval tokens 4096, loss 0.3492, lr 4.250e-04
+on 192: eval tokens 4096, loss 0.3314, lr 4.208e-04
+on 256: eval tokens 4096, loss 0.3109, lr 4.167e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.1s (14.74/s) 
+Epoch 6/30
+on 64: eval tokens 4096, loss 0.3059, lr 4.125e-04
+on 128: eval tokens 4096, loss 0.3272, lr 4.083e-04
+on 192: eval tokens 4096, loss 0.2853, lr 4.042e-04
+on 256: eval tokens 4096, loss 0.2947, lr 4.000e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.4s (14.41/s) 
+Epoch 7/30
+on 64: eval tokens 4096, loss 0.2921, lr 3.958e-04
+on 128: eval tokens 4096, loss 0.2861, lr 3.917e-04
+on 192: eval tokens 4096, loss 0.2644, lr 3.875e-04
+on 256: eval tokens 4096, loss 0.2522, lr 3.833e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.5s (14.40/s) 
+Epoch 8/30
+on 64: eval tokens 4096, loss 0.2664, lr 3.792e-04
+on 128: eval tokens 4096, loss 0.2586, lr 3.750e-04
+on 192: eval tokens 4096, loss 0.2530, lr 3.708e-04
+on 256: eval tokens 4096, loss 0.2319, lr 3.667e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.3s (14.54/s) 
+Epoch 9/30
+on 64: eval tokens 4096, loss 0.2303, lr 3.625e-04
+on 128: eval tokens 4096, loss 0.2250, lr 3.583e-04
+on 192: eval tokens 4096, loss 0.2577, lr 3.542e-04
+on 256: eval tokens 4096, loss 0.2344, lr 3.500e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 46.7s (5.43/s) 
+Epoch 10/30
+on 64: eval tokens 4096, loss 0.2159, lr 3.458e-04
+on 128: eval tokens 4096, loss 0.2433, lr 3.417e-04
+on 192: eval tokens 4096, loss 0.2234, lr 3.375e-04
+on 256: eval tokens 4096, loss 0.2233, lr 3.333e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.6s (14.30/s) 
+Epoch 11/30
+on 64: eval tokens 4096, loss 0.2029, lr 3.292e-04
+on 128: eval tokens 4096, loss 0.2138, lr 3.250e-04
+on 192: eval tokens 4096, loss 0.2086, lr 3.208e-04
+on 256: eval tokens 4096, loss 0.2174, lr 3.167e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.5s (14.43/s) 
+Epoch 12/30
+on 64: eval tokens 4096, loss 0.2025, lr 3.125e-04
+on 128: eval tokens 4096, loss 0.2075, lr 3.083e-04
+on 192: eval tokens 4096, loss 0.1949, lr 3.042e-04
+on 256: eval tokens 4096, loss 0.2012, lr 3.000e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.5s (14.39/s) 
+Epoch 13/30
+on 64: eval tokens 4096, loss 0.1894, lr 2.958e-04
+on 128: eval tokens 4096, loss 0.1802, lr 2.917e-04
+on 192: eval tokens 4096, loss 0.2039, lr 2.875e-04
+on 256: eval tokens 4096, loss 0.1941, lr 2.833e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.2s (14.63/s) 
+Epoch 14/30
+on 64: eval tokens 4096, loss 0.1699, lr 2.792e-04
+on 128: eval tokens 4096, loss 0.1871, lr 2.750e-04
+on 192: eval tokens 4096, loss 0.1996, lr 2.708e-04
+on 256: eval tokens 4096, loss 0.1828, lr 2.667e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.2s (14.71/s) 
+Epoch 15/30
+on 64: eval tokens 4096, loss 0.1658, lr 2.625e-04
+on 128: eval tokens 4096, loss 0.1680, lr 2.583e-04
+on 192: eval tokens 4096, loss 0.1795, lr 2.542e-04
+on 256: eval tokens 4096, loss 0.1934, lr 2.500e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.3s (14.53/s) 
+Epoch 16/30
+on 64: eval tokens 4096, loss 0.1824, lr 2.458e-04
+on 128: eval tokens 4096, loss 0.1597, lr 2.417e-04
+on 192: eval tokens 4096, loss 0.1675, lr 2.375e-04
+on 256: eval tokens 4096, loss 0.1737, lr 2.333e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.9s (14.05/s) 
+Epoch 17/30
+on 64: eval tokens 4096, loss 0.1549, lr 2.292e-04
+on 128: eval tokens 4096, loss 0.1799, lr 2.250e-04
+on 192: eval tokens 4096, loss 0.1607, lr 2.208e-04
+on 256: eval tokens 4096, loss 0.1692, lr 2.167e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.4s (14.49/s) 
+Epoch 18/30
+on 64: eval tokens 4096, loss 0.1502, lr 2.125e-04
+on 128: eval tokens 4096, loss 0.1789, lr 2.083e-04
+on 192: eval tokens 4096, loss 0.1586, lr 2.042e-04
+on 256: eval tokens 4096, loss 0.1580, lr 2.000e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.4s (14.52/s) 
+Epoch 19/30
+on 64: eval tokens 4096, loss 0.1635, lr 1.958e-04
+on 128: eval tokens 4096, loss 0.1549, lr 1.917e-04
+on 192: eval tokens 4096, loss 0.1541, lr 1.875e-04
+on 256: eval tokens 4096, loss 0.1571, lr 1.833e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.1s (14.71/s) 
+Epoch 20/30
+on 64: eval tokens 4096, loss 0.1607, lr 1.792e-04
+on 128: eval tokens 4096, loss 0.1378, lr 1.750e-04
+on 192: eval tokens 4096, loss 0.1684, lr 1.708e-04
+on 256: eval tokens 4096, loss 0.1470, lr 1.667e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.5s (14.39/s) 
+Epoch 21/30
+on 64: eval tokens 4096, loss 0.1614, lr 1.625e-04
+on 128: eval tokens 4096, loss 0.1432, lr 1.583e-04
+on 192: eval tokens 4096, loss 0.1507, lr 1.542e-04
+on 256: eval tokens 4096, loss 0.1479, lr 1.500e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.5s (14.35/s) 
+Epoch 22/30
+on 64: eval tokens 4096, loss 0.1300, lr 1.458e-04
+on 128: eval tokens 4096, loss 0.1444, lr 1.417e-04
+on 192: eval tokens 4096, loss 0.1591, lr 1.375e-04
+on 256: eval tokens 4096, loss 0.1607, lr 1.333e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 18.3s (13.81/s) 
+Epoch 23/30
+on 64: eval tokens 4096, loss 0.1437, lr 1.292e-04
+on 128: eval tokens 4096, loss 0.1457, lr 1.250e-04
+on 192: eval tokens 4096, loss 0.1400, lr 1.208e-04
+on 256: eval tokens 4096, loss 0.1550, lr 1.167e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.8s (14.14/s) 
+Epoch 24/30
+on 64: eval tokens 4096, loss 0.1447, lr 1.125e-04
+on 128: eval tokens 4096, loss 0.1410, lr 1.083e-04
+on 192: eval tokens 4096, loss 0.1488, lr 1.042e-04
+on 256: eval tokens 4096, loss 0.1448, lr 1.000e-04
+Training |████████████████████████████████████████| 256/256 [100%] in 17.4s (14.46/s) 
+Epoch 25/30
+on 64: eval tokens 4096, loss 0.1433, lr 9.583e-05
+on 128: eval tokens 4096, loss 0.1458, lr 9.167e-05
+on 192: eval tokens 4096, loss 0.1350, lr 8.750e-05
+on 256: eval tokens 4096, loss 0.1490, lr 8.333e-05
+Training |████████████████████████████████████████| 256/256 [100%] in 17.4s (14.49/s) 
+Epoch 26/30
+on 64: eval tokens 4096, loss 0.1344, lr 7.917e-05
+on 128: eval tokens 4096, loss 0.1368, lr 7.500e-05
+on 192: eval tokens 4096, loss 0.1562, lr 7.083e-05
+on 256: eval tokens 4096, loss 0.1429, lr 6.667e-05
+Training |████████████████████████████████████████| 256/256 [100%] in 17.2s (14.64/s) 
+Epoch 27/30
+on 64: eval tokens 4096, loss 0.1470, lr 6.250e-05
+on 128: eval tokens 4096, loss 0.1386, lr 5.833e-05
+on 192: eval tokens 4096, loss 0.1401, lr 5.417e-05
+on 256: eval tokens 4096, loss 0.1395, lr 5.000e-05
+Training |████████████████████████████████████████| 256/256 [100%] in 17.2s (14.65/s) 
+Epoch 28/30
+on 64: eval tokens 4096, loss 0.1432, lr 4.583e-05
+on 128: eval tokens 4096, loss 0.1380, lr 4.167e-05
+on 192: eval tokens 4096, loss 0.1422, lr 3.750e-05
+on 256: eval tokens 4096, loss 0.1403, lr 3.333e-05
+Training |████████████████████████████████████████| 256/256 [100%] in 17.5s (14.35/s) 
+Epoch 29/30
+on 64: eval tokens 4096, loss 0.1430, lr 2.917e-05
+on 128: eval tokens 4096, loss 0.1470, lr 2.500e-05
+on 192: eval tokens 4096, loss 0.1256, lr 2.083e-05
+on 256: eval tokens 4096, loss 0.1472, lr 1.667e-05
+Training |████████████████████████████████████████| 256/256 [100%] in 17.2s (14.65/s) 
+Epoch 30/30
+on 64: eval tokens 4096, loss 0.1605, lr 1.250e-05
+on 128: eval tokens 4096, loss 0.1308, lr 8.333e-06
+on 192: eval tokens 4096, loss 0.1315, lr 4.167e-06
+on 256: eval tokens 4096, loss 0.1392, lr 0.000e+00
+Training |████████████████████████████████████████| 256/256 [100%] in 17.0s (14.81/s) 
+Saved trained packet to ./packet_wrapper/qwen_3_8b/biography/8_8.pt
+(kv-packet) root@dedicated-developjob-kvbridge-ldeng-thdz4-7ccbd674f9-pcw98:/deng.lei2@ai.com/code/kvbridge/KVPacket# 
+
