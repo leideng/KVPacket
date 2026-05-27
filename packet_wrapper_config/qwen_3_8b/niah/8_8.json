@@ -17,7 +17,7 @@
             "use_cache": true
         }
     },
-    "cache_device": "cpu",
+    "cache_device": "cuda:0",
     "seed": 42,
     "ckpt_epoch": 0,
     "save_path": "./packet_wrapper/qwen_3_8b/niah",
