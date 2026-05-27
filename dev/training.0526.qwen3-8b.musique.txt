@@ -1,0 +1,60 @@
+Loaded 1 training configurations.
+ - packet_wrapper_config/qwen_3_8b/musique/8_8.json
+Training configuration:
+{
+│   'total_epoch': 30,
+│   'gen_batch_size': 8,
+│   'batch_size': 64,
+│   'forward_batch_size': 1,
+│   'header_len': 8,
+│   'trailer_len': 8,
+│   'dtype': 'float32',
+│   'use_logits': True,
+│   'use_cache': False,
+│   'model': {
+│   │   'model_path': '/public/models/Qwen3-8B',
+│   │   'dtype': 'bfloat16',
+│   │   'device': 'cuda:0',
+│   │   'generation_kwargs': {
+│   │   │   'max_new_tokens': 256,
+│   │   │   'stop_strings': ['<|im_end|>'],
+│   │   │   'do_sample': False,
+│   │   │   'use_cache': True
+│   │   }
+│   },
+│   'cache_device': 'cpu',
+│   'cache_path': None,
+│   'seed': 42,
+│   'save_path': './packet_wrapper/qwen_3_8b/musique/',
+│   'file_name': '8_8.pt',
+│   'ckpt_epoch': 10,
+│   'opt_config': {'lr': 0.0005, 'weight_decay': 0.0},
+│   'scheduler_config': {'start_factor': 1.0, 'end_factor': 0.0},
+│   'data_configs': [
+│   │   {
+│   │   │   'dataset_name': 'musique',
+│   │   │   'num_data_strs': 0,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 512,
+│   │   │   'subset': 'default',
+│   │   │   'split': 'train',
+│   │   │   'seed': 0,
+│   │   │   'data_kwargs': {'add_inst': True, 'add_cot': True},
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   }
+│   ],
+│   'resume': False,
+│   'resume_epoch': None
+}
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<02:28,  2.68it/s]Loading weights:   4%|▍         | 17/399 [00:00<00:08, 46.00it/s]Loading weights:  10%|▉         | 38/399 [00:00<00:04, 89.76it/s]Loading weights:  14%|█▍        | 57/399 [00:00<00:02, 117.75it/s]Loading weights:  18%|█▊        | 73/399 [00:00<00:02, 120.86it/s]Loading weights:  23%|██▎       | 91/399 [00:00<00:02, 136.91it/s]Loading weights:  27%|██▋       | 107/399 [00:01<00:02, 140.58it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:01, 148.76it/s]Loading weights:  37%|███▋      | 147/399 [00:01<00:01, 164.61it/s]Loading weights:  41%|████▏     | 165/399 [00:01<00:01, 161.02it/s]Loading weights:  46%|████▌     | 182/399 [00:01<00:01, 150.43it/s]Loading weights:  51%|█████     | 202/399 [00:01<00:01, 156.37it/s]Loading weights:  55%|█████▌    | 221/399 [00:01<00:01, 164.04it/s]Loading weights:  60%|█████▉    | 238/399 [00:01<00:01, 155.46it/s]Loading weights:  64%|██████▍   | 257/399 [00:01<00:00, 162.46it/s]Loading weights:  69%|██████▊   | 274/399 [00:02<00:00, 159.54it/s]Loading weights:  73%|███████▎  | 291/399 [00:02<00:00, 157.28it/s]Loading weights:  77%|███████▋  | 309/399 [00:02<00:00, 163.48it/s]Loading weights:  82%|████████▏ | 326/399 [00:02<00:00, 155.04it/s]Loading weights:  86%|████████▋ | 345/399 [00:02<00:00, 164.03it/s]Loading weights:  91%|█████████ | 362/399 [00:02<00:00, 162.06it/s]Loading weights:  95%|█████████▍| 379/399 [00:02<00:00, 159.12it/s]Loading weights: 100%|██████████| 399/399 [00:02<00:00, 142.47it/s]
+Embedding mean: 1.508e-05, std: 2.209e-02
+Traceback (most recent call last):
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_train_filler.py", line 728, in <module>
+    train_one_config(train_config, train_cache)
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_train_filler.py", line 550, in train_one_config
+    eval_generator = get_ret_eval_generator(
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/kv_packet/dataset/__init__.py", line 75, in get_ret_eval_generator
+    raise ValueError(f"Unknown eval generator: {name}")
+ValueError: Unknown eval generator: musique
