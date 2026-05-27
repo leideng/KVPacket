@@ -1,7 +1,7 @@
 {
     "total_epoch": 30,
-    "batch_size": 64,
-    "gen_batch_size": 4,
+    "batch_size": 32,
+    "gen_batch_size": 16,
     "forward_batch_size": 8,
     "header_len": 8,
     "trailer_len": 8,

@@ -469,10 +469,23 @@ def build_generation_cache(
 
     if batch_size <= 0:
         batch_size = len(input_strs)
-    
-    with alive_bar(total=len(input_strs), title="Building generation cache") as bar:
+
+    num_batches = (len(input_strs) + batch_size - 1) // batch_size
+    batch_idx = 0
+
+    with alive_bar(
+        total=num_batches,
+        title="Building generation cache",
+        dual_line=True,
+    ) as bar:
         for i in range(0, len(input_strs), batch_size):
+            batch_idx += 1
             batch_input_strs = input_strs[i: i + batch_size]
+            bar.text = (  # type: ignore[attr-defined]
+                f"Batch {batch_idx}/{num_batches} "
+                f"({i}/{len(input_strs)} samples)"
+            )
+            
             gen = get_generation(
                 model,
                 tokenizer,
@@ -480,8 +493,9 @@ def build_generation_cache(
                 generation_config=generation_config,
             )
             gen_len = len(batch_input_strs)
-            bar(gen_len)
-
+            
+            bar(1)
+            
             for k in range(gen_len):
                 sample_index = i + k
                 sample_str = sample_to_str(samples_to_gen[sample_index])
