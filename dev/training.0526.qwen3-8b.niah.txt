@@ -1,149 +1,0 @@
-Loaded 1 training configurations.
- - packet_wrapper_config/qwen_3_8b/niah/8_8.json
-Training configuration:
-{
-│   'total_epoch': 30,
-│   'gen_batch_size': 4,
-│   'batch_size': 64,
-│   'forward_batch_size': 8,
-│   'header_len': 8,
-│   'trailer_len': 8,
-│   'dtype': None,
-│   'use_logits': True,
-│   'use_cache': False,
-│   'model': {
-│   │   'model_path': '/public/models/Qwen3-8B',
-│   │   'dtype': 'bfloat16',
-│   │   'device': 'auto',
-│   │   'generation_kwargs': {
-│   │   │   'max_new_tokens': 128,
-│   │   │   'stop_strings': ['<|im_end|>'],
-│   │   │   'do_sample': False,
-│   │   │   'use_cache': True
-│   │   }
-│   },
-│   'cache_device': 'cpu',
-│   'cache_path': None,
-│   'seed': 42,
-│   'save_path': './packet_wrapper/qwen_3_8b/niah',
-│   'file_name': '8_8.pt',
-│   'ckpt_epoch': 0,
-│   'opt_config': {'lr': 0.0005, 'weight_decay': 0.0},
-│   'scheduler_config': {'start_factor': 1.0, 'end_factor': 0.0},
-│   'data_configs': [
-│   │   {
-│   │   │   'dataset_name': 'niah',
-│   │   │   'num_data_strs': 0,
-│   │   │   'num_shots': 0,
-│   │   │   'num_samples': 512,
-│   │   │   'subset': '8192',
-│   │   │   'split': 'train',
-│   │   │   'seed': 0,
-│   │   │   'data_kwargs': {'chunk_size': 4096},
-│   │   │   'template': 'qwen_3_chat',
-│   │   │   'template_kwargs': {}
-│   │   }
-│   ],
-│   'resume': False,
-│   'resume_epoch': None
-}
-Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:09,  5.75it/s]Loading weights:   1%|          | 2/399 [00:00<01:29,  4.43it/s]Loading weights:   4%|▍         | 17/399 [00:00<00:09, 42.43it/s]Loading weights:   9%|▉         | 37/399 [00:00<00:04, 84.41it/s]Loading weights:  14%|█▎        | 54/399 [00:00<00:03, 107.12it/s]Loading weights:  18%|█▊        | 71/399 [00:00<00:02, 123.42it/s]Loading weights:  23%|██▎       | 92/399 [00:00<00:02, 143.15it/s]Loading weights:  27%|██▋       | 108/399 [00:01<00:01, 147.56it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:01, 152.84it/s]Loading weights:  36%|███▌      | 142/399 [00:01<00:01, 151.54it/s]Loading weights:  40%|███▉      | 159/399 [00:01<00:01, 153.40it/s]Loading weights:  45%|████▌     | 180/399 [00:01<00:01, 162.90it/s]Loading weights:  49%|████▉     | 197/399 [00:01<00:01, 161.81it/s]Loading weights:  54%|█████▎    | 214/399 [00:01<00:01, 162.47it/s]Loading weights:  59%|█████▉    | 235/399 [00:01<00:00, 168.19it/s]Loading weights:  63%|██████▎   | 252/399 [00:01<00:00, 166.98it/s]Loading weights:  67%|██████▋   | 269/399 [00:02<00:00, 167.20it/s]Loading weights:  73%|███████▎  | 290/399 [00:02<00:00, 174.01it/s]Loading weights:  77%|███████▋  | 308/399 [00:02<00:00, 173.51it/s]Loading weights:  82%|████████▏ | 326/399 [00:02<00:00, 167.56it/s]Loading weights:  87%|████████▋ | 346/399 [00:02<00:00, 170.08it/s]Loading weights:  92%|█████████▏| 367/399 [00:02<00:00, 177.18it/s]Loading weights:  96%|█████████▋| 385/399 [00:02<00:00, 173.48it/s]Loading weights: 100%|██████████| 399/399 [00:02<00:00, 143.88it/s]
-Embedding mean: 1.508e-05, std: 2.209e-02
-Downloading readme:   0%|          | 0.00/1.42k [00:00<?, ?B/s]Downloading readme: 100%|██████████| 1.42k/1.42k [00:00<00:00, 5.69kB/s]Downloading readme: 100%|██████████| 1.42k/1.42k [00:00<00:00, 5.64kB/s]
-Downloading data:   0%|          | 0.00/67.8M [00:00<?, ?B/s]Downloading data:  15%|█▌        | 10.5M/67.8M [00:01<00:09, 5.84MB/s]Downloading data:  31%|███       | 21.0M/67.8M [00:02<00:04, 10.5MB/s]Downloading data:  46%|████▋     | 31.5M/67.8M [00:02<00:02, 14.0MB/s]Downloading data:  62%|██████▏   | 41.9M/67.8M [00:03<00:01, 16.5MB/s]Downloading data:  77%|███████▋  | 52.4M/67.8M [00:03<00:00, 18.5MB/s]Downloading data:  93%|█████████▎| 62.9M/67.8M [00:04<00:00, 19.9MB/s]Downloading data: 100%|██████████| 67.8M/67.8M [00:04<00:00, 20.6MB/s]Downloading data: 100%|██████████| 67.8M/67.8M [00:04<00:00, 15.9MB/s]
-Generating test split:   0%|          | 0/6500 [00:00<?, ? examples/s]Generating test split:  31%|███       | 2000/6500 [00:00<00:00, 16602.79 examples/s]Generating test split:  62%|██████▏   | 4000/6500 [00:00<00:00, 13556.37 examples/s]Generating test split:  92%|█████████▏| 6000/6500 [00:00<00:00, 15115.11 examples/s]Generating test split: 100%|██████████| 6500/6500 [00:00<00:00, 11594.47 examples/s]
-[nltk_data] Downloading package punkt to /root/nltk_data...
-[nltk_data]   Unzipping tokenizers/punkt.zip.
-Traceback (most recent call last):
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/kv_packet/dataset/utils.py", line 5, in split_with_nltk
-    sentences = nltk.sent_tokenize(text)
-                ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/tokenize/__init__.py", line 119, in sent_tokenize
-    tokenizer = _get_punkt_tokenizer(language)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/tokenize/__init__.py", line 105, in _get_punkt_tokenizer
-    return PunktTokenizer(language)
-           ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/tokenize/punkt.py", line 1744, in __init__
-    self.load_lang(lang)
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/tokenize/punkt.py", line 1749, in load_lang
-    lang_dir = find(f"tokenizers/punkt_tab/{lang}/")
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/data.py", line 696, in find
-    raise LookupError(resource_not_found)
-LookupError: 
-**********************************************************************
-  Resource 'punkt_tab' not found.
-  Please use the NLTK Downloader to obtain the resource:
-
-  >>> import nltk
-  >>> nltk.download('punkt_tab')
-
-  For more information see: https://www.nltk.org/data.html
-
-  Attempted to load 'tokenizers/punkt_tab/english/'
-
-  Searched in:
-    - '/root/nltk_data'
-    - '/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/nltk_data'
-    - '/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/share/nltk_data'
-    - '/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/nltk_data'
-    - '/usr/share/nltk_data'
-    - '/usr/local/share/nltk_data'
-    - '/usr/lib/nltk_data'
-    - '/usr/local/lib/nltk_data'
-**********************************************************************
-
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_train_filler.py", line 728, in <module>
-    train_one_config(train_config, train_cache)
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_train_filler.py", line 562, in train_one_config
-    samples.extend([TrainSample(**sample,) for sample in eval_generator]) # type: ignore
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/kv_packet/dataset/__init__.py", line 78, in wrapped_eval_generator
-    for eval_entry in eval_generator(
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/kv_packet/dataset/niah.py", line 93, in niah_ret_eval_generator
-    data_strs = split_with_nltk(
-                ^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/kv_packet/dataset/utils.py", line 8, in split_with_nltk
-    sentences = nltk.sent_tokenize(text)
-                ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/tokenize/__init__.py", line 119, in sent_tokenize
-    tokenizer = _get_punkt_tokenizer(language)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/tokenize/__init__.py", line 105, in _get_punkt_tokenizer
-    return PunktTokenizer(language)
-           ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/tokenize/punkt.py", line 1744, in __init__
-    self.load_lang(lang)
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/tokenize/punkt.py", line 1749, in load_lang
-    lang_dir = find(f"tokenizers/punkt_tab/{lang}/")
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/nltk/data.py", line 696, in find
-    raise LookupError(resource_not_found)
-LookupError: 
-**********************************************************************
-  Resource 'punkt_tab' not found.
-  Please use the NLTK Downloader to obtain the resource:
-
-  >>> import nltk
-  >>> nltk.download('punkt_tab')
-
-  For more information see: https://www.nltk.org/data.html
-
-  Attempted to load 'tokenizers/punkt_tab/english/'
-
-  Searched in:
-    - '/root/nltk_data'
-    - '/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/nltk_data'
-    - '/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/share/nltk_data'
-    - '/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/nltk_data'
-    - '/usr/share/nltk_data'
-    - '/usr/local/share/nltk_data'
-    - '/usr/lib/nltk_data'
-    - '/usr/local/lib/nltk_data'
-**********************************************************************
-

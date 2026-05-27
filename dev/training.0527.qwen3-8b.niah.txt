@@ -1,0 +1,108 @@
+Loaded 1 training configurations.
+ - packet_wrapper_config/qwen_3_8b/niah/8_8.json
+Training configuration:
+{
+│   'total_epoch': 30,
+│   'gen_batch_size': 4,
+│   'batch_size': 64,
+│   'forward_batch_size': 8,
+│   'header_len': 8,
+│   'trailer_len': 8,
+│   'dtype': None,
+│   'use_logits': True,
+│   'use_cache': False,
+│   'model': {
+│   │   'model_path': '/public/models/Qwen3-8B',
+│   │   'dtype': 'bfloat16',
+│   │   'device': 'auto',
+│   │   'generation_kwargs': {'max_new_tokens': 128, 'stop_strings': ['<|im_end|>'], 'do_sample': False, 'use_cache': True}
+│   },
+│   'cache_device': 'cpu',
+│   'cache_path': None,
+│   'seed': 42,
+│   'save_path': './packet_wrapper/qwen_3_8b/niah',
+│   'file_name': '8_8.pt',
+│   'ckpt_epoch': 0,
+│   'opt_config': {'lr': 0.0005, 'weight_decay': 0.0},
+│   'scheduler_config': {'start_factor': 1.0, 'end_factor': 0.0},
+│   'data_configs': [
+│   │   {
+│   │   │   'dataset_name': 'niah',
+│   │   │   'num_data_strs': 0,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 512,
+│   │   │   'subset': '8192',
+│   │   │   'split': 'train',
+│   │   │   'seed': 0,
+│   │   │   'data_kwargs': {'chunk_size': 4096},
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   }
+│   ],
+│   'resume': False,
+│   'resume_epoch': None
+}
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:01,  6.50it/s]Loading weights:   1%|          | 2/399 [00:00<01:20,  4.95it/s]Loading weights:   4%|▍         | 16/399 [00:00<00:08, 43.21it/s]Loading weights:   9%|▉         | 37/399 [00:00<00:04, 86.77it/s]Loading weights:  14%|█▍        | 56/399 [00:00<00:02, 114.85it/s]Loading weights:  18%|█▊        | 72/399 [00:00<00:02, 124.55it/s]Loading weights:  23%|██▎       | 93/399 [00:00<00:02, 147.16it/s]Loading weights:  29%|██▊       | 114/399 [00:01<00:01, 160.62it/s]Loading weights:  33%|███▎      | 131/399 [00:01<00:01, 158.25it/s]Loading weights:  37%|███▋      | 148/399 [00:01<00:01, 156.56it/s]Loading weights:  41%|████▏     | 165/399 [00:01<00:01, 160.27it/s]Loading weights:  46%|████▌     | 182/399 [00:01<00:01, 158.24it/s]Loading weights:  51%|█████     | 203/399 [00:01<00:01, 167.84it/s]Loading weights:  56%|█████▌    | 224/399 [00:01<00:01, 173.89it/s]Loading weights:  61%|██████    | 242/399 [00:01<00:00, 167.42it/s]Loading weights:  65%|██████▍   | 259/399 [00:01<00:00, 160.84it/s]Loading weights:  70%|███████   | 280/399 [00:02<00:00, 170.81it/s]Loading weights:  75%|███████▌  | 301/399 [00:02<00:00, 175.27it/s]Loading weights:  80%|███████▉  | 319/399 [00:02<00:00, 176.24it/s]Loading weights:  84%|████████▍ | 337/399 [00:02<00:00, 165.04it/s]Loading weights:  89%|████████▉ | 357/399 [00:02<00:00, 168.63it/s]Loading weights:  95%|█████████▍| 378/399 [00:02<00:00, 177.04it/s]Loading weights:  99%|█████████▉| 396/399 [00:02<00:00, 175.56it/s]Loading weights: 100%|██████████| 399/399 [00:02<00:00, 147.03it/s]
+Embedding mean: 1.508e-05, std: 2.209e-02
+Total training samples: 512
+on 0: The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Building generation cache |████████████████████████████████████████| 512/512 [100%] in 21:58.1 (0.39/s) 
+Epoch 1/30
+Training |⚠︎                                       | (!) 0/512 [0%] in 2.9s (0.00/s) 
+Traceback (most recent call last):
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_train_filler.py", line 728, in <module>
+    train_one_config(train_config, train_cache)
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_train_filler.py", line 658, in train_one_config
+    train_wrapper_4d_batch(
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_train_filler.py", line 143, in train_wrapper_4d_batch
+    outputs = model(
+              ^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/utils/generic.py", line 843, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 506, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/utils/generic.py", line 917, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 253, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 436, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/modeling_layers.py", line 93, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 337, in forward
+    hidden_states = self.post_attention_layernorm(hidden_states)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 62, in forward
+    variance = hidden_states.pow(2).mean(-1, keepdim=True)
+               ^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.20 GiB. GPU 0 has a total capacity of 139.80 GiB of which 47.19 MiB is free. Including non-PyTorch memory, this process has 139.75 GiB memory in use. Of the allocated memory 134.20 GiB is allocated by PyTorch, and 4.88 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
