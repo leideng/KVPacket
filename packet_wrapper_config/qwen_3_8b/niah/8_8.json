@@ -1,8 +1,8 @@
 {
     "total_epoch": 30,
-    "batch_size": 32,
+    "batch_size": 16,
     "gen_batch_size": 16,
-    "forward_batch_size": 8,
+    "forward_batch_size": 4,
     "header_len": 8,
     "trailer_len": 8,
     "use_logits": true,
@@ -17,7 +17,7 @@
             "use_cache": true
         }
     },
-    "cache_device": "cuda:0",
+    "cache_device": "cpu",
     "seed": 42,
     "ckpt_epoch": 0,
     "save_path": "./packet_wrapper/qwen_3_8b/niah",
@@ -33,7 +33,7 @@
     "data_configs": [
         {
             "dataset_name": "niah",
-            "num_samples": 512,
+            "num_samples": 128,
             "num_data_strs": 0,
             "num_shots": 0,
             "subset": "8192",
