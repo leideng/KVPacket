@@ -1,0 +1,16 @@
+Found 1 configuration files:
+  packet_wrapper_config/qwen_3_8b/biography/8_8.json
+
+Starting evaluation...
+
+Running evaluation for config: packet_wrapper_config/qwen_3_8b/biography/8_8.json...
+Traceback (most recent call last):
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_eval.py", line 540, in <module>
+    run_one_config(
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_eval.py", line 354, in run_one_config
+    eval_config = load_eval_config(eval_config_json)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/deng.lei2@ai.com/code/kvbridge/KVPacket/run_eval.py", line 89, in load_eval_config
+    dataset_name=loaded_json["dataset"]["dataset_name"],
+                 ~~~~~~~~~~~^^^^^^^^^^^
+KeyError: 'dataset'
