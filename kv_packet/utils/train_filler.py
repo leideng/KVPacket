@@ -204,6 +204,17 @@ def batched_packet_4d_mask(
     padding_side: str = 'left',
     device: torch.device = torch.device("cpu"),
 ) -> torch.Tensor:
+    """
+    Stack per-sample packet 4D masks into one batch tensor, padding to max seq_len.
+
+    Returns shape (batch_size, 1, max_seq_len, max_seq_len). With default left padding,
+    each sample's mask sits in the bottom-right (aligned with left-padded embeddings).
+
+    Example:
+        batch_input_chunk_sizes = [[3, 5], [3, 4, 3]]   # chunk sizes ≥3; 2 then 3 chunks
+        batch_query_len = [4, 4]
+        # → seq_lens 12 and 14; output (2, 1, 14, 14); row 0 mask at [-12:, -12:]
+    """
     mask_list: list[torch.Tensor] = [
         packet_4d_mask(
             input_chunk_sizes=input_chunk_sizes,
