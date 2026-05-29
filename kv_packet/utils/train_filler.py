@@ -442,6 +442,8 @@ def get_packed_logits(
         gen_logits = generation["logits"][0].unsqueeze(0) # [1, gen_seq_len, vocab_size]
         packed_logits_list.append(gen_logits)
 
+    # Padding logits is similar to padding input embeddings
+    # Thus, we can reuse the same function to pad logits;
     batched_logits = batched_input_embed(
         input_embed_list=packed_logits_list,
         padding_side=padding_side
