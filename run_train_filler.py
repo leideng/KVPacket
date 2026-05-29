@@ -192,9 +192,11 @@ def train_wrapper_4d_batch(
                 ) # [f_batch_size * max_gen_seq_len]
 
                 loss = (loss * eval_mask.reshape(-1)).sum()
-            
+
+            # Gradient accumulation: d/dθ(Σ L_i) = Σ dL_i/dθ; backward per micro-batch
+            # matches one backward on the summed loss (grads accumulate in .grad).
             loss.backward()
-            acc_loss += loss.item()
+            acc_loss += loss.item()  # logging only not for backward pass (gradient accumulation)
 
             train_step += forward_batch_size
             bar(forward_batch_size)
