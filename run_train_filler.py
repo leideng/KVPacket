@@ -171,12 +171,13 @@ def train_wrapper_4d_batch(
 
                 loss_fct: torch.nn.Module = torch.nn.KLDivLoss(
                     reduction="none",
-                    log_target=True
+                    log_target=True  # input log Q instead of Q
                 )
 
+                # KV (target || input) =KV(P || Q) 
                 loss = loss_fct(
-                    input=logits_to_eval,
-                    target=target_logits,
+                    input=logits_to_eval, #log Q (carry gradients)
+                    target=target_logits, #log P
                 ).sum(-1) # [f_batch_size, max_gen_seq_len]
 
                 loss = (loss * eval_mask).sum()
