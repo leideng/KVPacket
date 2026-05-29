@@ -148,6 +148,31 @@ def get_generation(
     sequence = generation_output.sequences # [batch_size, seq_len]
     logits = generation_output.logits # tuple (gen_len) of [batch_size, vocab_size]
     
+    """
+    here is a example to show the output structure
+
+    # sequences: [batch_size=2, prompt_len + gen_len = 7]
+    sequence = tensor([
+        [101,  5,  9,  3,  42,  7,  18],   # batch item 0: first 4 are prompt, last 3 generated
+        [101,  5,  9,  3,  11, 22,  33],   # batch item 1
+    ])
+
+    # logits: tuple of length gen_len=3
+    logits = (
+        # step t=0  -> shape [batch_size=2, vocab_size=5]
+        tensor([[ 1.2, -0.3,  0.5,  2.1,  0.0],     # produced token 42 for item 0 (argmax-ish)
+                [ 0.1,  3.0, -1.0,  0.2,  0.4]]),   # produced token 11 for item 1
+
+        # step t=1  -> [2, 5]
+        tensor([[-0.5,  2.2,  0.1,  0.0,  1.1],
+                [ 0.3,  0.0,  2.5, -0.2,  0.1]]),
+
+        # step t=2  -> [2, 5]
+        tensor([[ 0.9,  0.0,  0.1,  3.3, -0.4],
+                [ 2.0,  0.1,  0.2,  0.5,  0.0]]),
+    )
+    """
+
     assert logits is not None
     logit_tensor = torch.stack(logits, dim=1) # [batch_size, gen_len, vocab_size]
 
