@@ -301,9 +301,12 @@ def prepare_sample_input(
     Documents are wrapped with ``packet_wrapper``; the query tail uses teacher forcing
     from ``generation_cache`` (precomputed on preamble+docs+task_prompt).
 
+    (NOTE) the last generated token 'z' is only a target, 
+    not an extra input step for predicting next token. Thus the input is gen_seq[:-1].
+
     Toy example (token counts; header_len=1, trailer_len=1):
         preamble="sys" (1) | doc="ab" (2) -> wrap -> 1+2+1=4 | task="Q:" (2)
-        gen_seq=[x,y,z] (3) -> query_ids = "Q:" + [x,y] -> query_len=4
+        gen_seq=[x,y,z] (3) -> query_ids = "Q:" + [x,y] -> query_len=4 
         Returns: input_embed [1, 1+4+4, dim], chunk_sizes=[1, 4], query_len=4, gen_seq_len=3
 
     Returns:
