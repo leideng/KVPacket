@@ -186,6 +186,23 @@ def bio_ret_eval_generator(
     else:
         few_shot_str = ""
 
+    # Example (num_data_strs=2, i=0, question_type="QA"):
+    #   idx = 42  # target person: Jonathon Gross
+    #   question_str = "What is the birth date of Jonathon Gross? Respond with the answer only. Answer:"
+    #   answer_str = "March 12, 1991"
+    #   data_indices = rng.sample(all_indices, 2)  # e.g. [17, 42]
+    #   if idx not in data_indices: data_indices[0] = idx  # ensure target doc included
+    #   data_strs = [
+    #       get_data_str(17),   # distractor bio (e.g. Courtney Vang ...)
+    #       get_data_str(42),   # target bio (Jonathon Gross was born ... Seattle ... )
+    #   ]
+    #   yield RetEvalEntry(
+    #       preamble=few_shot_str,
+    #       documents=data_strs,
+    #       task_prompt=question_str,
+    #       query=question_str,
+    #       answer=answer_str,
+    #   )
     for i in range(num_samples):
         idx = all_indices[i]
         question_str, answer_str = get_question_answer(idx)
