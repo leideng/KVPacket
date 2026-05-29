@@ -61,7 +61,7 @@ def train_wrapper_4d_batch(
     if len(samples) % batch_size != 0:
         raise ValueError("Number of samples must be multiple of batch_size")
 
-    # Determine which samples need generation
+    # No-op if main pre-filled cache; generates missing samples when called standalone.
     generation_cache = build_generation_cache(
         samples,
         gen_batch_size,
@@ -232,6 +232,7 @@ def train_wrapper_4d(
     model.eval()
     model.gradient_checkpointing_enable()
 
+    # No-op if main pre-filled cache; generates missing samples when called standalone.
     generation_cache = build_generation_cache(
         samples,
         gen_batch_size,
@@ -617,6 +618,7 @@ def train_one_config(
     use_logits = train_config["use_logits"]
     cache_path = train_config["cache_path"]
 
+    # Pre-fill cache before training (saved to cache_path); train fns call again but skip cached samples.
     old_cache_len = len(generation_cache.cache)
     generation_cache = build_generation_cache(
         samples,

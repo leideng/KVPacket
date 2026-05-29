@@ -450,10 +450,12 @@ def build_generation_cache(
     generation_cache: GenerationCache|None = None,
     store_logits: bool = True,
 ) -> GenerationCache:
+    """Generate and cache model outputs. Idempotent: only missing samples are generated."""
     if generation_cache is None:
         generation_cache = GenerationCache()
     
     # Determine which samples need generation
+    # only those that are not in the cache are generated
     samples_to_gen = [
         sample for sample in samples
         if sample_to_str(sample) not in generation_cache
