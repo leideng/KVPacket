@@ -631,6 +631,7 @@ def train_one_config(
     )
     new_cache_len = len(generation_cache.cache)
 
+    # Save updated cache to file if it grew and a path was provided.
     if new_cache_len > old_cache_len and cache_path is not None:
         torch.save(generation_cache.to_state_dict(), cache_path)
         print(f"Saved updated generation cache to {cache_path}, size: {new_cache_len}")
