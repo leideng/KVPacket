@@ -140,6 +140,12 @@ def train_wrapper_4d_batch(
             for i, gen_seq_len in enumerate(batch_gen_seq_lens):
                 eval_mask[i, -gen_seq_len:] = 1.0
 
+            # with packet_attn_mask, we will not do full attention;
+            # only query tokens can attend to all input chunks;
+            # one chunk does not attend to other chunks
+            # (NOTE) Here we do not reuse precomputed KV caches; 
+            # instead we use sparse attention with given mask
+            # to minic the KV cache reuse behavior;
             outputs = model(
                 inputs_embeds=input_embed,
                 attention_mask=packet_attn_mask,
