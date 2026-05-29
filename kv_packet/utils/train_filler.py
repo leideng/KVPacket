@@ -230,6 +230,27 @@ def batched_packet_4d_mask(
     max_seq_len = max(mask.size(-1) for mask in mask_list)
     batch_size = len(mask_list)
 
+    # could result in OOM if max_seq_len is too large
+    # padded_masks: (batch_size, 1, max_seq_len, max_seq_len), dtype=bool (1 byte/elem)
+    # | max_seq_len | batch=1 | batch=8 | batch=16 |
+    # |-------------|---------|---------|----------|
+    # | 4K          | 16 MiB  | 128 MiB | 256 MiB  |
+    # | 8K          | 64 MiB  | 512 MiB | 1 GiB    |
+    # | 16K         | 256 MiB | 2 GiB   | 4 GiB    |
+    # | 32K         | 1 GiB   | 8 GiB   | 16 GiB   |
+    # | 64K         | 4 GiB   | 32 GiB  | 64 GiB   |
+    # | 128K        | 16 GiB  | 128 GiB | 256 GiB  |
+    
+    need_bytes = batch_size * max_seq_len * max_seq_len  # torch.bool, 1 byte/elem
+    if device.type == "cuda":
+        free_bytes, _ = torch.cuda.mem_get_info(device)
+        if need_bytes > free_bytes:
+            raise RuntimeError(
+                f"padded_masks needs ~{need_bytes / 1024**3:.2f} GiB "
+                f"({batch_size=}, {max_seq_len=}), "
+                f"but only ~{free_bytes / 1024**3:.2f} GiB free on {device}."
+            )
+
     padded_masks = torch.zeros(
         (batch_size, 1, max_seq_len, max_seq_len),
         dtype=torch.bool, device=device
