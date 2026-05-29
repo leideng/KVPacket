@@ -142,6 +142,23 @@ def bio_ret_eval_generator(
 
 
     def get_question_answer(index: int) -> tuple[str, str]:
+        """
+        Sample a (question, answer) pair for the person at `index`.
+
+        Loads ds['test'][index] (aligned with ds['train'][index]), picks a random
+        attribute from BIO_ATTRIBUTES, then builds the question by question_type:
+        - "completion": an incomplete sentence from item[rand_key], prefixed "## "
+        - "QA": a full question from format_question(rand_key, name, rng)
+        The gold answer is item['labels'][rand_key].
+
+        Example (index=42, rand_key="birth_date", question_type="completion"):
+            question = "## Jonathon Gross entered existence on"
+            answer = "March 12, 1991"
+
+        Example (same index, question_type="QA"):
+            question = "What is the birth date of Jonathon Gross? Respond with the answer only. Answer:"
+            answer = "March 12, 1991"
+        """
         item = ds['test'][index]
         rand_key = rng.choice(BIO_ATTRIBUTES)
         if question_type == "completion":
