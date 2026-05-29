@@ -211,7 +211,7 @@ def batched_packet_4d_mask(
     each sample's mask sits in the bottom-right (aligned with left-padded embeddings).
 
     Example:
-        batch_input_chunk_sizes = [[3, 5], [3, 4, 3]]   # chunk sizes ≥3; 2 then 3 chunks
+        batch_input_chunk_sizes = [[3, 5], [3, 4, 3]]   
         batch_query_len = [4, 4]
         # → seq_lens 12 and 14; output (2, 1, 14, 14); row 0 mask at [-12:, -12:]
     """
