@@ -257,6 +257,7 @@ def batched_input_embed(
         assert padding_tensor.size(0) == 1 and padding_tensor.size(1) == 1
         assert padding_tensor.size(2) == dim
     else:
+        # Match device/dtype of embeddings so torch.cat below does not fail.
         padding_tensor = torch.zeros((1, 1, dim)).to(input_embed_list[0])
 
     max_seq_len = max(embed.size(1) for embed in input_embed_list)
