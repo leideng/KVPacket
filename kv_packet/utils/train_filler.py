@@ -301,8 +301,11 @@ def prepare_sample_input(
     Documents are wrapped with ``packet_wrapper``; the query tail uses teacher forcing
     from ``generation_cache`` (precomputed on preamble+docs+task_prompt).
 
-    (NOTE) the last generated token 'z' is only a target, 
+    (NOTE1) the last generated token 'z' is only a target, 
     not an extra input step for predicting next token. Thus the input is gen_seq[:-1].
+
+    (NOTE2) Documents are the only chunks that get packet headers/trailers; 
+    preamble and query stay unwrapped.
 
     Toy example (token counts; header_len=1, trailer_len=1):
         preamble="sys" (1) | doc="ab" (2) -> wrap -> 1+2+1=4 | task="Q:" (2)
@@ -311,7 +314,7 @@ def prepare_sample_input(
 
     Returns:
         input_embed: [1, total_len, hidden_dim]
-        input_chunk_sizes: per-chunk lengths for preamble and each document only
+        input_chunk_sizes: per-chunk lengths for preamble and each document only; query is not included
         query_len: tokens in the final (unwrapped) query+prefix segment
         gen_seq_len: length of the cached generation (loss targets)
     """
