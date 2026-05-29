@@ -106,6 +106,32 @@ def bio_ret_eval_generator(
     all_indices = all_indices[:-num_shots] if num_shots > 0 else all_indices
 
     def get_data_str(index: int) -> str:
+        """
+        Build one document string (a synthetic biography paragraph) for the person
+        at `index`.
+
+        Loads ds['train'][index], then for each attribute in BIO_ATTRIBUTES
+        randomly picks one paraphrase from item[attr] and joins all six
+        sentences with spaces. Same underlying facts, different surface wording
+        on each call (controlled by rng).
+
+        Example (index=42, simplified item):
+            item = {
+                "name": "Jonathon Gross",
+                "birth_date": [
+                    "Jonathon Gross entered existence on March 12, 1991.",
+                    "Jonathon Gross was born on March 12, 1991.",
+                ],
+                "birth_place": [
+                    "Jonathon Gross originated from Seattle.",
+                    "Jonathon Gross was born in Seattle.",
+                ],
+                ...
+            }
+            rng.choice might pick one sentence per attribute, yielding:
+            "Jonathon Gross was born on March 12, 1991. Jonathon Gross
+            originated from Seattle. ..." (six sentences total)
+        """
         item = ds['train'][index]
         data_str = " ".join([
             rng.choice(
