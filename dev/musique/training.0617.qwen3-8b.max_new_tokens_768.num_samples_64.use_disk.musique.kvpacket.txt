@@ -1,0 +1,158 @@
+Loaded 1 training configurations.
+ - packet_wrapper_config/qwen_3_8b/musique/8_8_disk.json
+Training configuration:
+{
+│   'total_epoch': 30,
+│   'gen_batch_size': 2,
+│   'batch_size': 64,
+│   'forward_batch_size': 1,
+│   'header_len': 8,
+│   'trailer_len': 8,
+│   'dtype': 'float32',
+│   'use_logits': True,
+│   'use_cache': False,
+│   'model': {
+│   │   'model_path': '/public/models/Qwen3-8B',
+│   │   'dtype': 'bfloat16',
+│   │   'device': 'cuda:0',
+│   │   'generation_kwargs': {'max_new_tokens': 768, 'stop_strings': ['<|im_end|>'], 'do_sample': False, 'use_cache': True}
+│   },
+│   'cache_device': 'disk',
+│   'cache_path': './generation_cache/qwen_3_8b/musique/8_8_64samples_768maxtokens.disk.pt',
+│   'generation_cache_save_interval': 8,
+│   'seed': 42,
+│   'save_path': './packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_disk/',
+│   'file_name': '8_8_disk.pt',
+│   'ckpt_epoch': 2,
+│   'opt_config': {'lr': 0.0005, 'weight_decay': 0.0},
+│   'scheduler_config': {'start_factor': 1.0, 'end_factor': 0.0},
+│   'data_configs': [
+│   │   {
+│   │   │   'dataset_name': 'musique',
+│   │   │   'num_data_strs': 0,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 64,
+│   │   │   'subset': 'default',
+│   │   │   'split': 'train',
+│   │   │   'seed': 0,
+│   │   │   'data_kwargs': {'add_inst': True, 'add_cot': False, 'answer_only': False},
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   }
+│   ],
+│   'resume': False,
+│   'resume_epoch': None
+}
+Model device: cuda:0; current CUDA device: 0
+Embedding mean: 1.508e-05, std: 2.209e-02
+Total training samples: 64
+**************************************************
+Training input length statistics (tokens):
+  full input per sample: mean=2513.52, median=2447, p90=3318, p95=3532, min=1349, max=3702
+--------------------------------------------------
+  all documents per sample: mean=2410.92, median=2352, p90=3212, p95=3435, min=1248, max=3587
+--------------------------------------------------
+  individual document: mean=120.83, median=106, p90=214, p95=255, min=24, max=656
+--------------------------------------------------
+  document count per sample: mean=19.95, median=20, p90=20, p95=20, min=17, max=20
+--------------------------------------------------
+  KVPacket context per sample: mean=2836.52, median=2776, p90=3640, p95=3860, min=1670, max=4023
+**************************************************
+Initialized new generation cache at ./generation_cache/qwen_3_8b/musique/8_8_64samples_768maxtokens.disk.pt
+[Timing] Teacher cache load: 0.001 s (00:00:00)
+Teacher targets: 0 cached, 64 to generate.
+on 0: [TeacherCache] batch 1/32 start, samples 1-2/64, cached=0, shards=disabled, memory=459.6GiB/460.0GiB (99.9%)
+on 1: [TeacherCache] batch 1/32 done, generate=23.07s, cache_add=1.18s, index_save=0.00s, total=24.44s, cached=2, shards=2 files/890.3MiB, memory=459.2GiB/460.0GiB (99.8%)
+on 1: [TeacherCache] batch 2/32 start, samples 3-4/64, cached=2, shards=2 files/890.3MiB, memory=459.2GiB/460.0GiB (99.8%)
+on 2: [TeacherCache] batch 2/32 done, generate=21.94s, cache_add=1.14s, index_save=0.00s, total=23.27s, cached=4, shards=4 files/1.7GiB, memory=459.0GiB/460.0GiB (99.8%)
+on 2: [TeacherCache] batch 3/32 start, samples 5-6/64, cached=4, shards=4 files/1.7GiB, memory=459.0GiB/460.0GiB (99.8%)
+on 3: [TeacherCache] batch 3/32 done, generate=18.04s, cache_add=0.65s, index_save=0.00s, total=18.93s, cached=6, shards=6 files/2.2GiB, memory=459.2GiB/460.0GiB (99.8%)
+on 3: [TeacherCache] batch 4/32 start, samples 7-8/64, cached=6, shards=6 files/2.2GiB, memory=459.2GiB/460.0GiB (99.8%)
+on 4: [TeacherCache] batch 4/32 done, generate=21.88s, cache_add=1.11s, index_save=0.00s, total=23.30s, cached=8, shards=8 files/3.1GiB, memory=460.0GiB/460.0GiB (100.0%)
+on 4: [TeacherCache] batch 5/32 start, samples 9-10/64, cached=8, shards=8 files/3.1GiB, memory=460.0GiB/460.0GiB (100.0%)
+on 5: [TeacherCache] batch 5/32 done, generate=21.94s, cache_add=1.25s, index_save=0.00s, total=23.41s, cached=10, shards=10 files/4.0GiB, memory=459.3GiB/460.0GiB (99.8%)
+on 5: [TeacherCache] batch 6/32 start, samples 11-12/64, cached=10, shards=10 files/4.0GiB, memory=459.3GiB/460.0GiB (99.8%)
+on 6: [TeacherCache] batch 6/32 done, generate=21.70s, cache_add=1.03s, index_save=0.00s, total=22.93s, cached=12, shards=12 files/4.5GiB, memory=459.4GiB/460.0GiB (99.9%)
+on 6: [TeacherCache] batch 7/32 start, samples 13-14/64, cached=12, shards=12 files/4.5GiB, memory=459.4GiB/460.0GiB (99.9%)
+on 7: [TeacherCache] batch 7/32 done, generate=21.79s, cache_add=1.24s, index_save=0.00s, total=23.34s, cached=14, shards=14 files/5.3GiB, memory=460.0GiB/460.0GiB (100.0%)
+on 7: [TeacherCache] batch 8/32 start, samples 15-16/64, cached=14, shards=14 files/5.3GiB, memory=460.0GiB/460.0GiB (100.0%)
+on 8: [TeacherCache] batch 8/32 done, generate=21.90s, cache_add=0.91s, index_save=0.00s, total=23.04s, cached=16, shards=16 files/5.9GiB, memory=459.1GiB/460.0GiB (99.8%)
+on 8: [TeacherCache] batch 9/32 start, samples 17-18/64, cached=16, shards=16 files/5.9GiB, memory=459.1GiB/460.0GiB (99.8%)
+on 9: [TeacherCache] batch 9/32 done, generate=8.93s, cache_add=0.38s, index_save=0.00s, total=9.49s, cached=18, shards=18 files/6.1GiB, memory=459.6GiB/460.0GiB (99.9%)
+on 9: [TeacherCache] batch 10/32 start, samples 19-20/64, cached=18, shards=18 files/6.1GiB, memory=459.6GiB/460.0GiB (99.9%)
+on 10: [TeacherCache] batch 10/32 done, generate=20.16s, cache_add=0.76s, index_save=0.00s, total=21.10s, cached=20, shards=20 files/6.7GiB, memory=459.3GiB/460.0GiB (99.9%)
+on 10: [TeacherCache] batch 11/32 start, samples 21-22/64, cached=20, shards=20 files/6.7GiB, memory=459.3GiB/460.0GiB (99.9%)
+on 11: [TeacherCache] batch 11/32 done, generate=21.81s, cache_add=0.77s, index_save=0.00s, total=22.86s, cached=22, shards=22 files/7.3GiB, memory=459.9GiB/460.0GiB (100.0%)
+on 11: [TeacherCache] batch 12/32 start, samples 23-24/64, cached=22, shards=22 files/7.3GiB, memory=459.9GiB/460.0GiB (100.0%)
+on 12: [TeacherCache] batch 12/32 done, generate=21.99s, cache_add=0.99s, index_save=0.00s, total=23.17s, cached=24, shards=24 files/8.1GiB, memory=459.4GiB/460.0GiB (99.9%)
+on 12: [TeacherCache] batch 13/32 start, samples 25-26/64, cached=24, shards=24 files/8.1GiB, memory=459.4GiB/460.0GiB (99.9%)
+on 13: [TeacherCache] batch 13/32 done, generate=10.67s, cache_add=0.48s, index_save=0.00s, total=11.33s, cached=26, shards=26 files/8.4GiB, memory=459.6GiB/460.0GiB (99.9%)
+on 13: [TeacherCache] batch 14/32 start, samples 27-28/64, cached=26, shards=26 files/8.4GiB, memory=459.6GiB/460.0GiB (99.9%)
+on 14: [TeacherCache] batch 14/32 done, generate=21.95s, cache_add=1.11s, index_save=0.00s, total=23.29s, cached=28, shards=28 files/9.3GiB, memory=459.2GiB/460.0GiB (99.8%)
+on 14: [TeacherCache] batch 15/32 start, samples 29-30/64, cached=28, shards=28 files/9.3GiB, memory=459.2GiB/460.0GiB (99.8%)
+on 15: [TeacherCache] batch 15/32 done, generate=13.06s, cache_add=0.45s, index_save=0.00s, total=13.66s, cached=30, shards=30 files/9.6GiB, memory=459.6GiB/460.0GiB (99.9%)
+on 15: [TeacherCache] batch 16/32 start, samples 31-32/64, cached=30, shards=30 files/9.6GiB, memory=459.6GiB/460.0GiB (99.9%)
+on 16: [TeacherCache] batch 16/32 done, generate=21.63s, cache_add=0.67s, index_save=0.00s, total=22.56s, cached=32, shards=32 files/10.1GiB, memory=459.7GiB/460.0GiB (99.9%)
+on 16: [TeacherCache] batch 17/32 start, samples 33-34/64, cached=32, shards=32 files/10.1GiB, memory=459.7GiB/460.0GiB (99.9%)
+on 17: [TeacherCache] batch 17/32 done, generate=10.20s, cache_add=0.54s, index_save=0.00s, total=10.90s, cached=34, shards=34 files/10.5GiB, memory=459.5GiB/460.0GiB (99.9%)
+on 17: [TeacherCache] batch 18/32 start, samples 35-36/64, cached=34, shards=34 files/10.5GiB, memory=459.5GiB/460.0GiB (99.9%)
+on 18: [TeacherCache] batch 18/32 done, generate=21.96s, cache_add=1.09s, index_save=0.00s, total=23.26s, cached=36, shards=36 files/11.3GiB, memory=459.2GiB/460.0GiB (99.8%)
+on 18: [TeacherCache] batch 19/32 start, samples 37-38/64, cached=36, shards=36 files/11.3GiB, memory=459.2GiB/460.0GiB (99.8%)
+on 19: [TeacherCache] batch 19/32 done, generate=7.40s, cache_add=0.33s, index_save=0.00s, total=7.86s, cached=38, shards=38 files/11.5GiB, memory=459.6GiB/460.0GiB (99.9%)
+on 19: [TeacherCache] batch 20/32 start, samples 39-40/64, cached=38, shards=38 files/11.5GiB, memory=459.6GiB/460.0GiB (99.9%)
+on 20: [TeacherCache] batch 20/32 done, generate=14.99s, cache_add=0.50s, index_save=0.00s, total=15.65s, cached=40, shards=40 files/11.9GiB, memory=459.7GiB/460.0GiB (99.9%)
+on 20: [TeacherCache] batch 21/32 start, samples 41-42/64, cached=40, shards=40 files/11.9GiB, memory=459.7GiB/460.0GiB (99.9%)
+on 21: [TeacherCache] batch 21/32 done, generate=8.31s, cache_add=0.36s, index_save=0.00s, total=8.80s, cached=42, shards=42 files/12.2GiB, memory=459.7GiB/460.0GiB (99.9%)
+on 21: [TeacherCache] batch 22/32 start, samples 43-44/64, cached=42, shards=42 files/12.2GiB, memory=459.7GiB/460.0GiB (99.9%)
+on 22: [TeacherCache] batch 22/32 done, generate=21.82s, cache_add=0.99s, index_save=0.00s, total=23.04s, cached=44, shards=44 files/12.9GiB, memory=459.2GiB/460.0GiB (99.8%)
+on 22: [TeacherCache] batch 23/32 start, samples 45-46/64, cached=44, shards=44 files/12.9GiB, memory=459.2GiB/460.0GiB (99.8%)
+on 23: [TeacherCache] batch 23/32 done, generate=21.96s, cache_add=1.05s, index_save=0.00s, total=23.19s, cached=46, shards=46 files/13.8GiB, memory=459.3GiB/460.0GiB (99.8%)
+on 23: [TeacherCache] batch 24/32 start, samples 47-48/64, cached=46, shards=46 files/13.8GiB, memory=459.3GiB/460.0GiB (99.8%)
+on 24: [TeacherCache] batch 24/32 done, generate=22.06s, cache_add=0.71s, index_save=0.00s, total=22.95s, cached=48, shards=48 files/14.3GiB, memory=459.3GiB/460.0GiB (99.8%)
+on 24: [TeacherCache] batch 25/32 start, samples 49-50/64, cached=48, shards=48 files/14.3GiB, memory=459.3GiB/460.0GiB (99.8%)
+on 25: [TeacherCache] batch 25/32 done, generate=22.35s, cache_add=0.83s, index_save=0.00s, total=23.37s, cached=50, shards=50 files/15.0GiB, memory=459.3GiB/460.0GiB (99.9%)
+on 25: [TeacherCache] batch 26/32 start, samples 51-52/64, cached=50, shards=50 files/15.0GiB, memory=459.3GiB/460.0GiB (99.9%)
+on 26: [TeacherCache] batch 26/32 done, generate=22.42s, cache_add=0.74s, index_save=0.00s, total=23.83s, cached=52, shards=52 files/15.5GiB, memory=459.0GiB/460.0GiB (99.8%)
+on 26: [TeacherCache] batch 27/32 start, samples 53-54/64, cached=52, shards=52 files/15.5GiB, memory=459.0GiB/460.0GiB (99.8%)
+on 27: [TeacherCache] batch 27/32 done, generate=16.37s, cache_add=0.62s, index_save=0.00s, total=18.32s, cached=54, shards=54 files/16.0GiB, memory=459.4GiB/460.0GiB (99.9%)
+on 27: [TeacherCache] batch 28/32 start, samples 55-56/64, cached=54, shards=54 files/16.0GiB, memory=459.4GiB/460.0GiB (99.9%)
+on 28: [TeacherCache] batch 28/32 done, generate=9.74s, cache_add=0.42s, index_save=0.00s, total=10.34s, cached=56, shards=56 files/16.4GiB, memory=459.5GiB/460.0GiB (99.9%)
+on 28: [TeacherCache] batch 29/32 start, samples 57-58/64, cached=56, shards=56 files/16.4GiB, memory=459.5GiB/460.0GiB (99.9%)
+on 29: [TeacherCache] batch 29/32 done, generate=21.60s, cache_add=1.19s, index_save=0.00s, total=23.00s, cached=58, shards=58 files/17.3GiB, memory=459.4GiB/460.0GiB (99.9%)
+on 29: [TeacherCache] batch 30/32 start, samples 59-60/64, cached=58, shards=58 files/17.3GiB, memory=459.4GiB/460.0GiB (99.9%)
+on 30: [TeacherCache] batch 30/32 done, generate=21.71s, cache_add=1.11s, index_save=0.00s, total=23.05s, cached=60, shards=60 files/18.1GiB, memory=459.3GiB/460.0GiB (99.9%)
+on 30: [TeacherCache] batch 31/32 start, samples 61-62/64, cached=60, shards=60 files/18.1GiB, memory=459.3GiB/460.0GiB (99.9%)
+on 31: [TeacherCache] batch 31/32 done, generate=21.65s, cache_add=1.20s, index_save=0.00s, total=23.03s, cached=62, shards=62 files/18.9GiB, memory=459.5GiB/460.0GiB (99.9%)
+on 31: [TeacherCache] batch 32/32 start, samples 63-64/64, cached=62, shards=62 files/18.9GiB, memory=459.5GiB/460.0GiB (99.9%)
+on 32: [TeacherCache] batch 32/32 done, generate=21.53s, cache_add=1.12s, index_save=0.00s, total=22.85s, cached=64, shards=64 files/19.8GiB, memory=458.9GiB/460.0GiB (99.8%)
+Building generation cache |████████████████████████████████████████| 32/32 [100%] in 10:34.0 (0.05/s) 
+Saved updated generation cache to ./generation_cache/qwen_3_8b/musique/8_8_64samples_768maxtokens.disk.pt, size: 64
+[Timing] Teacher logits precompute (64 samples): 634.105 s (00:10:34)
+Epoch 1/30
+on 63: eval tokens 35015, loss 0.7818, lr 4.833e-04
+|████████████████████████████████████████| 64/64 [100%] in 52.2s (1.23/s) 
+[Timing] Training epoch 1/30: 52.432 s (00:00:52)
+Epoch 2/30
+on 63: eval tokens 35015, loss 0.7123, lr 4.667e-04
+|████████████████████████████████████████| 64/64 [100%] in 55.4s (1.16/s) 
+[Timing] Training epoch 2/30: 55.510 s (00:00:56)
+Saved checkpoint to ./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_disk//8_8_disk.pt.epoch2
+Epoch 3/30
+on 63: eval tokens 35015, loss 0.7126, lr 4.500e-04
+|████████████████████████████████████████| 64/64 [100%] in 48.8s (1.31/s) 
+[Timing] Training epoch 3/30: 48.896 s (00:00:49)
+Epoch 4/30
+on 63: eval tokens 35015, loss 0.6711, lr 4.333e-04
+|████████████████████████████████████████| 64/64 [100%] in 46.8s (1.37/s) 
+[Timing] Training epoch 4/30: 47.058 s (00:00:47)
+Saved checkpoint to ./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_disk//8_8_disk.pt.epoch4
+Epoch 5/30
+on 63: eval tokens 35015, loss 0.6494, lr 4.167e-04
+|████████████████████████████████████████| 64/64 [100%] in 50.2s (1.28/s) 
+[Timing] Training epoch 5/30: 50.294 s (00:00:50)
+Epoch 6/30
+on 63: eval tokens 35015, loss 0.6220, lr 4.000e-04
+|████████████████████████████████████████| 64/64 [100%] in 47.2s (1.36/s) 
+[Timing] Training epoch 6/30: 47.280 s (00:00:47)
+Saved checkpoint to ./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_disk//8_8_disk.pt.epoch6
+Epoch 7/30
