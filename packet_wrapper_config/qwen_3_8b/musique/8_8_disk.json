@@ -19,11 +19,11 @@
         }
     },
     "cache_device": "disk",
-    "cache_path": "./generation_cache/qwen_3_8b/musique/8_8_2048samples_768maxtokens.disk.pt",
+    "cache_path": "./generation_cache/qwen_3_8b/musique/8_8_64samples_768maxtokens.disk.pt",
     "generation_cache_save_interval": 8,
     "seed": 42,
     "ckpt_epoch": 2,
-    "save_path": "./packet_wrapper/qwen_3_8b/musique/num_samples_2048_max_tokens_768_lr5e-4_disk/",
+    "save_path": "./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_disk/",
     "file_name": "8_8_disk.pt",
     "opt_config": {
         "lr": 5e-4,
@@ -36,7 +36,7 @@
     "data_configs": [
         {
             "dataset_name": "musique",
-            "num_samples": 2048,
+            "num_samples": 64,
             "num_data_strs": 0,
             "num_shots": 0,
             "subset": "default",
