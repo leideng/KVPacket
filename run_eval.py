@@ -3,6 +3,7 @@ import os
 import torch
 import argparse
 import glob
+from time import perf_counter
 from typing import TypedDict, Iterator, Callable
 from alive_progress import alive_it
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -17,6 +18,23 @@ from kv_packet.dataset.abc import RetEvalEntry
 from kv_packet.utils.metric import calculate_metrics
 from kv_packet.utils.config import gather_config_files, load_config_file
 from kv_packet.model import SupportedModel
+
+
+def synchronize_cuda(device: torch.device) -> None:
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+
+
+def format_duration(seconds: float) -> str:
+    total_seconds = int(round(seconds))
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds_part = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds_part:02d}"
+
+
+def print_duration(label: str, seconds: float) -> None:
+    print(f"[Timing] {label}: {seconds:.3f} s ({format_duration(seconds)})")
+
 
 class ModelConfig(TypedDict):
     model_path: str
@@ -75,6 +93,20 @@ class EvalResult(TypedDict):
     flops: float
     num_orig_tokens: int
     num_wrapped_tokens: int
+
+
+class EvalTiming(TypedDict):
+    samples: int
+    input_prepare: float
+    kv_build: float
+    quantization: float
+    cache_comb_and_generation: float
+    total_loop: float
+    avg_input_prepare: float
+    avg_kv_build: float
+    avg_quantization: float
+    avg_cache_comb_and_generation: float
+    avg_total_sample: float
 
 
 def load_eval_config(loaded_json: dict) -> EvalConfig:
@@ -147,7 +179,7 @@ def run_eval(
     answer_postprocess_func: Callable[[str, str], tuple[str, str]]|None = None,
     eval_config: EvalConfig|None = None,
     debug: bool = False,
-) -> EvalResult:
+) -> tuple[EvalResult, EvalTiming]:
     total_tp = 0
     total_fp = 0
     total_fn = 0
@@ -158,7 +190,22 @@ def run_eval(
 
     num_eval = 0
 
+    # checkpoint
+    input_prepare_seconds = 0.0
+    kv_build_seconds = 0.0
+    quantization_seconds = 0.0
+    cache_comb_seconds = 0.0
+    model_device = torch.device(model.device)
+    synchronize_cuda(model_device)
+    eval_loop_start = perf_counter()
+
+    sample_precisions = []
+    sample_recalls = []
+    sample_f1s = []
+
     for eval_entry in alive_it(list(eval_generator)) if not debug else eval_generator:
+        synchronize_cuda(model_device)
+        input_prepare_start = perf_counter()
         query = eval_entry["query"]
         gt_answer = eval_entry["answer"]
         preamble = eval_entry["preamble"]
@@ -239,6 +286,12 @@ def run_eval(
 
             input_embeds = wrapped_input_embeds
 
+        # checkpoint
+        synchronize_cuda(model_device)
+        input_prepare_seconds += perf_counter() - input_prepare_start
+        synchronize_cuda(model_device)
+        kv_build_start = perf_counter()
+
         if compressor is not None:
             # compress only supports single sample currently
             kv_caches: list[KVCache] = []
@@ -272,6 +325,12 @@ def run_eval(
                 attention_mask=attn_mask,
                 compressor=compressor,
             )
+        
+        # checkpoint
+        synchronize_cuda(model_device)
+        kv_build_seconds += perf_counter() - kv_build_start
+        synchronize_cuda(model_device)
+        quantization_start = perf_counter()
 
         if quantization_config is not None:
             kv_caches = [
@@ -286,6 +345,12 @@ def run_eval(
                 for kv_cache in kv_caches
             ]
 
+        # checkpoing
+        synchronize_cuda(model_device)
+        quantization_seconds += perf_counter() - quantization_start
+        synchronize_cuda(model_device)
+        cache_comb_start = perf_counter()
+
         result = cache_comb_func(
             model=model,
             tokenizer=tokenizer,
@@ -299,11 +364,21 @@ def run_eval(
             kwargs=cache_comb_kwargs,
         )
 
+        synchronize_cuda(model_device)
+        cache_comb_seconds += perf_counter() - cache_comb_start
+
         ttft = result['ttft']
         tp = result['tp']
         fp = result['fp']
         fn = result['fn']
         flops = result["flops"]
+
+
+        # TODO: added by lff for sample-level analysis
+        sample_precision, sample_recall, sample_f1 = calculate_metrics(tp, fp, fn)
+        sample_precisions.append(sample_precision)
+        sample_recalls.append(sample_recall)
+        sample_f1s.append(sample_f1)
 
         total_tp += tp
         total_fp += fp
@@ -311,10 +386,38 @@ def run_eval(
         total_ttft += ttft
         total_flops += flops
         num_eval += 1
-    
-    precision, recall, f1 = calculate_metrics(total_tp, total_fp, total_fn)
+
+    synchronize_cuda(model_device)
+    total_loop_seconds = perf_counter() - eval_loop_start
+
+    # TODO: added by lff for sample-level analysis
+    precision = (
+        sum(sample_precisions) / len(sample_precisions) if sample_precisions else 0.0
+    )
+    recall = (
+        sum(sample_recalls) / len(sample_recalls) if sample_recalls else 0.0
+    )
+    f1 = (
+        sum(sample_f1s) / len(sample_f1s) if sample_f1s else 0.0
+    )
+    micro_precision, micro_recall, micro_f1 = calculate_metrics(total_tp, total_fp, total_fn)
     avg_ttft = total_ttft / num_eval if num_eval > 0 else 0.0
     avg_flops = total_flops / num_eval if num_eval > 0 else 0.0
+
+    print(f"Total samples evaluated: {num_eval}")
+    print(f"Total true positives: {total_tp}")
+    print(f"Total false positives: {total_fp}")
+    print(f"Total false negatives: {total_fn}")
+
+    print('\nSample-averaged metrics (average of per-sample precision, recall, F1):')
+    print(f"Precision: {precision:.4f}")
+    print(f"Recall: {recall:.4f}")
+    print(f"F1-score: {f1:.4f}")    
+
+    print('\nMicro-averaged metrics (computed from total TP, FP, FN):')
+    print('Micro Precision: {:.4f}'.format(micro_precision))
+    print('Micro Recall: {:.4f}'.format(micro_recall))
+    print('Micro F1-score: {:.4f}'.format(micro_f1))
 
     f_result = EvalResult(
         precision=precision,
@@ -326,7 +429,22 @@ def run_eval(
         num_wrapped_tokens=num_wrapped_tokens
     )
 
-    return f_result
+    # return f_result
+    timing = EvalTiming(
+        samples=num_eval,
+        input_prepare=input_prepare_seconds,
+        kv_build=kv_build_seconds,
+        quantization=quantization_seconds,
+        cache_comb_and_generation=cache_comb_seconds,
+        total_loop=total_loop_seconds,
+        avg_input_prepare=input_prepare_seconds / num_eval if num_eval > 0 else 0.0,
+        avg_kv_build=kv_build_seconds / num_eval if num_eval > 0 else 0.0,
+        avg_quantization=quantization_seconds / num_eval if num_eval > 0 else 0.0,
+        avg_cache_comb_and_generation=cache_comb_seconds / num_eval if num_eval > 0 else 0.0,
+        avg_total_sample=total_loop_seconds / num_eval if num_eval > 0 else 0.0,
+    )
+
+    return f_result, timing
 
 
 def run_one_config(
@@ -335,28 +453,34 @@ def run_one_config(
     eval_results: dict[str, dict],
     overwrite: bool = False,
     debug: bool = False,
-):
+):  
+    config_wall_start = perf_counter()
     result_folder = os.path.join(
         os.path.dirname(eval_config_file),
         "eval_results"
     )
     result_file = os.path.splitext(os.path.basename(eval_config_file))[0] + "_result.json"
     result_path = os.path.join(result_folder, result_file)
+    print('result_path is ', result_path)
 
     if not overwrite and os.path.exists(result_path):
         print(f"Skipping existing evaluation for config: {eval_config_file}")
         return
 
+    config_load_start = perf_counter()
     eval_config_json = load_config_file(
         eval_config_file,
         default_config_file="_default.json"
     )
     eval_config = load_eval_config(eval_config_json)
+    config_load_seconds = perf_counter() - config_load_start
     os.makedirs(result_folder, exist_ok=True)
+    print('Model device for evaluation:', eval_config["model"]["device"])
 
     # Save a copy of the original config before preparation
     _eval_config = eval_config.copy()
     packet_wrapper_key = eval_config.get("packet_wrapper", None)
+    print("packet_wrapper_key for evaluation:", packet_wrapper_key)
 
     # Try to load model, tokenizer from cache
     model_cache_key = (
@@ -365,39 +489,72 @@ def run_one_config(
         eval_config["model"]["device"],
     )
 
-    packet_wrapper = eval_cache["packet_wrapper"].get(packet_wrapper_key, None)
+    # # Original
+    # packet_wrapper = eval_cache["packet_wrapper"].get(packet_wrapper_key, None)
+    # TODO: Add device parameter
+    model_device = torch.device(eval_config["model"]["device"])
+    packet_wrapper_cache_key = (
+        packet_wrapper_key,
+        str(model_device),
+    )
+    packet_wrapper = eval_cache["packet_wrapper"].get(packet_wrapper_cache_key, None)
+
+    print("packet_wrapper for evaluation:", packet_wrapper)
     model = eval_cache["model"].get(model_cache_key, None)
     tokenizer = eval_cache["tokenizer"].get(model_cache_key, None)
 
+    # checkpoint for device
+    if model_device.type == "cuda":
+        torch.cuda.set_device(model_device)
+    print(
+        f"Model device: {model_device}; "
+        f"current CUDA device: "
+        f"{torch.cuda.current_device() if torch.cuda.is_available() else 'N/A'}"
+    )
+
+    packet_wrapper_load_seconds = 0.0
     if packet_wrapper is None and packet_wrapper_key is not None:
+        packet_wrapper_load_start = perf_counter()
         assert eval_config["cache_comb"]["method"] == "kv_packet", \
             "Packet wrapper is only compatible with 'kv_packet' cache_comb method."
         packet_wrapper = load_wrapper(
             packet_wrapper_key,
-            device=torch.device(eval_config["model"]["device"])
+            device=model_device,
+            # device=torch.device(eval_config["model"]["device"])
         )
+        packet_wrapper_load_seconds = perf_counter() - packet_wrapper_load_start
         print(f"Packet wrapper loaded {packet_wrapper}.")
-        eval_cache["packet_wrapper"][packet_wrapper_key] = packet_wrapper
+        # eval_cache["packet_wrapper"][packet_wrapper_key] = packet_wrapper
+        eval_cache["packet_wrapper"][packet_wrapper_cache_key] = packet_wrapper
 
+    model_load_seconds = 0.0
     if model is None or tokenizer is None:
+        synchronize_cuda(model_device)
+        model_load_start = perf_counter()
         model = AutoModelForCausalLM.from_pretrained(
             eval_config["model"]["model_path"],
             dtype=eval_config["model"]["dtype"],
-            device_map=torch.device(eval_config["model"]["device"]),
+            # device_map=torch.device(eval_config["model"]["device"]),
+            device_map=model_device,
             low_cpu_mem_usage=True
         )
         tokenizer = AutoTokenizer.from_pretrained(
             eval_config["model"]["model_path"]
         )
         tokenizer.padding_side = 'left'
+        # TODO: some models may not have pad_token defined, which will cause generation to fail. We can try to add a pad token if it's missing.
         if tokenizer.pad_token_id is None:
-            tokenizer.pad_token_id = tokenizer.eos_token_id + 2
+            tokenizer.add_special_tokens({"pad_token": "<pad>"})
+            model.resize_token_embeddings(len(tokenizer))
         assert model.generation_config is not None
         model.generation_config.pad_token_id = tokenizer.pad_token_id
         eval_cache["model"][model_cache_key] = model
         eval_cache["tokenizer"][model_cache_key] = tokenizer
+        synchronize_cuda(model_device)
+        model_load_seconds = perf_counter() - model_load_start
 
     # Prepare eval generator
+    dataset_prepare_start = perf_counter()
     eval_generator = get_ret_eval_generator(
         name=eval_config["dataset"]["dataset_name"],
         num_samples=eval_config["dataset"]["num_samples"],
@@ -410,6 +567,8 @@ def run_one_config(
         template=eval_config["dataset"]["template"],
         template_kwargs=eval_config["dataset"]["template_kwargs"],
     )
+    dataset_prepare_seconds = perf_counter() - dataset_prepare_start
+
 
     answer_postprocess_func = ANSWER_POSTPROCESS_DICT.get(
         eval_config["dataset"]["dataset_name"], None
@@ -444,7 +603,7 @@ def run_one_config(
 
     # Run evaluation
     assert isinstance(model, SupportedModel), "Model type not supported."
-    result = run_eval(
+    result, eval_timing = run_eval(
         model=model,
         tokenizer=tokenizer,
         eval_generator=eval_generator,
@@ -459,13 +618,46 @@ def run_one_config(
         eval_config=eval_config,
         debug=debug,
     )
+    result_write_start = perf_counter()
 
     eval_results[eval_config_file] = {
         "config": _eval_config,
         "result": result,
+        "timing": {
+            "config_load": config_load_seconds,
+            "packet_wrapper_load": packet_wrapper_load_seconds,
+            "model_and_tokenizer_load": model_load_seconds,
+            "dataset_prepare": dataset_prepare_seconds,
+            **eval_timing,
+        },
     }
     with open(result_path, "w") as f:
         json.dump(eval_results[eval_config_file], f, indent=4)
+    result_write_seconds = perf_counter() - result_write_start
+    config_wall_seconds = perf_counter() - config_wall_start
+
+    print("\n========== Evaluation Timing Summary ==========")
+    print_duration("Config load", config_load_seconds)
+    print_duration("Packet wrapper load", packet_wrapper_load_seconds)
+    print_duration("Model/tokenizer load", model_load_seconds)
+    print_duration("Dataset prepare", dataset_prepare_seconds)
+    print_duration("Input prepare", eval_timing["input_prepare"])
+    print_duration("Document KV build", eval_timing["kv_build"])
+    print_duration("Quantization", eval_timing["quantization"])
+    print_duration("Cache combination + generation", eval_timing["cache_comb_and_generation"])
+    print_duration("Evaluation loop total", eval_timing["total_loop"])
+    print_duration("Result write", result_write_seconds)
+    print_duration("Config wall time", config_wall_seconds)
+    if eval_timing["samples"] > 0:
+        print(
+            "[Timing] Per-sample avg: "
+            f"input={eval_timing['avg_input_prepare']:.3f}s, "
+            f"kv={eval_timing['avg_kv_build']:.3f}s, "
+            f"quant={eval_timing['avg_quantization']:.3f}s, "
+            f"comb+gen={eval_timing['avg_cache_comb_and_generation']:.3f}s, "
+            f"total={eval_timing['avg_total_sample']:.3f}s"
+        )
+    print("==============================================")
 
 
 
@@ -498,6 +690,7 @@ if __name__ == "__main__":
     all_config_files: set[str] = set()
 
     for pattern in config_files_or_paths:
+        print('Searching for config files with pattern:', pattern)
         matched_paths = glob.glob(pattern, recursive=False)
 
         for path in matched_paths:
