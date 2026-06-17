@@ -1,0 +1,53 @@
+{
+    "total_epoch": 30,
+    "batch_size": 64,
+    "gen_batch_size": 2,
+    "forward_batch_size": 1,
+    "header_len": 8,
+    "trailer_len": 8,
+    "use_logits": true,
+    "dtype": "float32",
+    "model": {
+        "model_path": "/public/models/Qwen3-8B",
+        "dtype": "bfloat16",
+        "device": "cuda:0",
+        "generation_kwargs": {
+            "max_new_tokens": 768,
+            "stop_strings": ["<|im_end|>"],
+            "do_sample": false,
+            "use_cache": true
+        }
+    },
+    "cache_device": "disk",
+    "cache_path": "./generation_cache/qwen_3_8b/musique/8_8_2048samples_768maxtokens.disk.pt",
+    "generation_cache_save_interval": 8,
+    "seed": 42,
+    "ckpt_epoch": 2,
+    "save_path": "./packet_wrapper/qwen_3_8b/musique/num_samples_2048_max_tokens_768_lr5e-4_disk/",
+    "file_name": "8_8_disk.pt",
+    "opt_config": {
+        "lr": 5e-4,
+        "weight_decay": 0.0
+    },
+    "scheduler_config":{
+        "start_factor": 1.0,
+        "end_factor": 0.0
+    },
+    "data_configs": [
+        {
+            "dataset_name": "musique",
+            "num_samples": 2048,
+            "num_data_strs": 0,
+            "num_shots": 0,
+            "subset": "default",
+            "split": "train",
+            "seed": 0,
+            "data_kwargs": {
+                "add_inst": true,
+                "add_cot": false,
+                "answer_only": false
+            },
+            "template": "qwen_3_chat"
+        }
+    ]
+}
