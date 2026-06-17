@@ -1,4 +1,8 @@
 import torch
+import os
+# [KVPacket disk-cache change] Force Python GC after each teacher-generation batch.
+import gc
+from time import perf_counter
 from warnings import warn
 from typing import TypedDict
 from alive_progress import alive_bar
@@ -37,6 +41,28 @@ class DatasetConfig(TypedDict):
     template_kwargs: dict
 
 
+# class TrainConfig(TypedDict):
+#     total_epoch: int
+#     gen_batch_size: int # 生成 teacher answer / logits 的 batch，只影响“预生成目标答案/目标 logits”的阶段：use_logits=true 时会保存 [batch, gen_len, vocab]，Qwen3-8B 词表大，所以瞬间要几十 GB
+#     batch_size: int # 梯度累积 / optimizer step 的 batch
+#     forward_batch_size: int # 训练 forward/backward 的 micro-batch，控制每次 forward 的样本数量，如果等于 1，走单样本训练路径 train_wrapper_4d；如果大于 1，走 batch 训练路径 train_wrapper_4d_batch；越大越快，但显存越高
+#     trailer_len: int
+#     dtype: str|None
+#     use_logits: bool
+#     use_cache: bool
+#     model: ModelConfig
+#     cache_device: str
+#     cache_path: str|None
+#     seed: int
+#     save_path: str
+#     file_name: str
+#     ckpt_epoch: int # 控制每隔多少 epoch 保存一次 checkpoint
+#     resume: bool
+#     resume_epoch: int|None
+#     opt_config: dict
+#     scheduler_config: dict
+#     data_configs: list[DatasetConfig]
+
 class TrainConfig(TypedDict):
     total_epoch: int
     gen_batch_size: int
@@ -50,6 +76,7 @@ class TrainConfig(TypedDict):
     model: ModelConfig
     cache_device: str
     cache_path: str|None
+    generation_cache_save_interval: int
     seed: int
     save_path: str
     file_name: str
@@ -70,6 +97,50 @@ dtype_map: dict[str, torch.dtype] = {
     'long': torch.long,
     'bool': torch.bool
 }
+
+def _format_bytes(num_bytes: int) -> str:
+    units = ["B", "KiB", "MiB", "GiB", "TiB"]
+    value = float(num_bytes)
+    for unit in units:
+        if value < 1024 or unit == units[-1]:
+            return f"{value:.1f}{unit}"
+        value /= 1024
+    return f"{value:.1f}TiB"
+
+
+def _cgroup_memory_status() -> str:
+    try:
+        with open("/sys/fs/cgroup/memory.current", "r") as f:
+            current = int(f.read().strip())
+        with open("/sys/fs/cgroup/memory.max", "r") as f:
+            max_text = f.read().strip()
+        if max_text == "max":
+            return f"memory={_format_bytes(current)}/unlimited"
+        maximum = int(max_text)
+        return (
+            f"memory={_format_bytes(current)}/{_format_bytes(maximum)} "
+            f"({current / maximum * 100:.1f}%)"
+        )
+    except OSError:
+        return "memory=unknown"
+
+
+def _disk_cache_status(generation_cache: GenerationCache) -> str:
+    offload_dir = getattr(generation_cache, "offload_dir", None)
+    if offload_dir is None or not os.path.isdir(offload_dir):
+        return "shards=disabled"
+
+    num_files = 0
+    total_bytes = 0
+    for root, _, files in os.walk(offload_dir):
+        num_files += len(files)
+        for fname in files:
+            fpath = os.path.join(root, fname)
+            try:
+                total_bytes += os.path.getsize(fpath)
+            except OSError:
+                pass
+    return f"shards={num_files} files/{_format_bytes(total_bytes)}"
 
 
 def load_train_config(config: dict) -> TrainConfig:
@@ -109,6 +180,7 @@ def load_train_config(config: dict) -> TrainConfig:
         model=model,
         cache_device=cache_device,
         cache_path=config.get("cache_path", None),
+        generation_cache_save_interval=config.get("generation_cache_save_interval", 0),
         seed=seed,
         save_path=config["save_path"],
         file_name=config["file_name"],
@@ -289,7 +361,6 @@ def batched_input_embed(
         assert padding_tensor.size(0) == 1 and padding_tensor.size(1) == 1
         assert padding_tensor.size(2) == dim
     else:
-        # Match device/dtype of embeddings so torch.cat below does not fail.
         padding_tensor = torch.zeros((1, 1, dim)).to(input_embed_list[0])
 
     max_seq_len = max(embed.size(1) for embed in input_embed_list)
@@ -438,8 +509,10 @@ def get_packed_logits(
         generation = generation_cache.get(sample_str)
         assert generation is not None
         assert len(generation["logits"]) == 1
-
-        gen_logits = generation["logits"][0].unsqueeze(0) # [1, gen_seq_len, vocab_size]
+        
+        # TODO: modify device
+        gen_logits = generation["logits"][0].unsqueeze(0).to('cuda:0') # [1, gen_seq_len, vocab_size]
+        # gen_logits = generation["logits"][0].unsqueeze(0).to(device)
         packed_logits_list.append(gen_logits)
 
     # Padding logits is similar to padding input embeddings
@@ -499,6 +572,15 @@ def get_packed_labels(
     return batched_labels
 
 
+# def build_generation_cache(
+#     samples: list[TrainSample],
+#     batch_size: int,
+#     model: SupportedModel,
+#     tokenizer: TokenizerType,
+#     generation_config: GenerationConfig|None = None,
+#     generation_cache: GenerationCache|None = None,
+#     store_logits: bool = True,
+# ) -> GenerationCache:
 def build_generation_cache(
     samples: list[TrainSample],
     batch_size: int,
@@ -507,6 +589,8 @@ def build_generation_cache(
     generation_config: GenerationConfig|None = None,
     generation_cache: GenerationCache|None = None,
     store_logits: bool = True,
+    cache_path: str|None = None,
+    save_interval: int = 0,
 ) -> GenerationCache:
     """Generate and cache model outputs. Idempotent: only missing samples are generated."""
     if generation_cache is None:
@@ -541,21 +625,44 @@ def build_generation_cache(
         for i in range(0, len(input_strs), batch_size):
             batch_idx += 1
             batch_input_strs = input_strs[i: i + batch_size]
+
+            # checkpoint for cache_device disk
+            batch_start = perf_counter()
+            print(
+                "[TeacherCache] "
+                f"batch {batch_idx}/{num_batches} start, "
+                f"samples {i + 1}-{i + len(batch_input_strs)}/{len(input_strs)}, "
+                f"cached={len(generation_cache.cache)}, "
+                f"{_disk_cache_status(generation_cache)}, "
+                f"{_cgroup_memory_status()}",
+                flush=True,
+            )
+
             bar.text = (  # type: ignore[attr-defined]
                 f"Batch {batch_idx}/{num_batches} "
                 f"({i}/{len(input_strs)} samples)"
             )
             
+            # gen = get_generation(
+            #     model,
+            #     tokenizer,
+            #     input_strs=batch_input_strs,
+            #     generation_config=generation_config,
+            # )
+            generate_start = perf_counter()
             gen = get_generation(
                 model,
                 tokenizer,
                 input_strs=batch_input_strs,
                 generation_config=generation_config,
+                output_logits=store_logits,
             )
+            generate_seconds = perf_counter() - generate_start
             gen_len = len(batch_input_strs)
             
             bar(1)
             
+            add_start = perf_counter()
             for k in range(gen_len):
                 sample_index = i + k
                 sample_str = sample_to_str(samples_to_gen[sample_index])
@@ -564,5 +671,36 @@ def build_generation_cache(
                     "logits": [gen["logits"][k]] if store_logits else [],
                     "text": [gen["text"][k]],
                 })
+            add_seconds = perf_counter() - add_start
+            
+            save_seconds = 0.0
+            if cache_path is not None and save_interval > 0 and batch_idx % save_interval == 0:
+                cache_dir = os.path.dirname(cache_path)
+                if cache_dir:
+                    os.makedirs(cache_dir, exist_ok=True)
+                save_start = perf_counter()
+                torch.save(generation_cache.to_state_dict(), cache_path)
+                save_seconds = perf_counter() - save_start
+
+            del gen
+            # [KVPacket disk-cache change] Drop transient teacher logits after caching/offload.
+            gc.collect()
+            if model.device.type == "cuda":
+                with torch.cuda.device(model.device):
+                    torch.cuda.empty_cache()
+                
+            batch_seconds = perf_counter() - batch_start
+            print(
+                "[TeacherCache] "
+                f"batch {batch_idx}/{num_batches} done, "
+                f"generate={generate_seconds:.2f}s, "
+                f"cache_add={add_seconds:.2f}s, "
+                f"index_save={save_seconds:.2f}s, "
+                f"total={batch_seconds:.2f}s, "
+                f"cached={len(generation_cache.cache)}, "
+                f"{_disk_cache_status(generation_cache)}, "
+                f"{_cgroup_memory_status()}",
+                flush=True,
+            )
 
     return generation_cache
