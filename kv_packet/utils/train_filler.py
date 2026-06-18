@@ -511,8 +511,9 @@ def get_packed_logits(
         assert len(generation["logits"]) == 1
         
         # TODO: modify device
-        gen_logits = generation["logits"][0].unsqueeze(0).to('cuda:0') # [1, gen_seq_len, vocab_size]
+        # gen_logits = generation["logits"][0].unsqueeze(0).to('cuda:0') # [1, gen_seq_len, vocab_size]
         # gen_logits = generation["logits"][0].unsqueeze(0).to(device)
+        gen_logits = generation["logits"][0].unsqueeze(0) # for DDP training
         packed_logits_list.append(gen_logits)
 
     # Padding logits is similar to padding input embeddings
