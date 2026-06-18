@@ -392,7 +392,7 @@ def train_wrapper_4d_batch(
                 scheduler.step()
                 optimizer.zero_grad()
                 lr = scheduler.get_last_lr()[0]
-                print(f"eval tokens {eval_tokens}, loss {acc_loss / eval_tokens:.4f}, lr {lr:.3e}")
+                print(f"rank {dist.get_rank()}, train step {train_step}, eval tokens {eval_tokens}, loss {acc_loss / eval_tokens:.4f}, lr {lr:.3e}")
                 eval_tokens = 0
                 acc_loss = 0.0
 
@@ -599,7 +599,7 @@ def train_wrapper_4d(
             optimizer.zero_grad()
             scheduler.step()
             lr = scheduler.get_last_lr()[0]
-            print(f"eval tokens {eval_tokens}, loss {acc_loss / eval_tokens:.4f}, lr {lr:.3e}")
+            print(f"rank {dist.get_rank()}, train step {train_step}, eval tokens {eval_tokens}, loss {acc_loss / eval_tokens:.4f}, lr {lr:.3e}")
             eval_tokens = 0
             acc_loss = 0.0
             gc.collect()
