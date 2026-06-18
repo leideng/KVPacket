@@ -338,7 +338,7 @@ def train_wrapper_4d_batch(
                     generation_cache,
                     padding_side='left',
                 ) # [f_batch_size, max_gen_seq_len, vocab_size]
-                target_logits = target_logits.log_softmax(dim=-1)
+                target_logits = target_logits.log_softmax(dim=-1).to(logits_to_eval.device)
                 logits_to_eval = logits_to_eval.log_softmax(dim=-1)
 
                 assert target_logits.size() == logits_to_eval.size()
