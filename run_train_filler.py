@@ -5,11 +5,15 @@ import random
 import os
 import gc
 import re
+# [DDP change]
+from collections.abc import Callable
 from time import perf_counter
 from alive_progress import alive_it, alive_bar
 from rich.pretty import pprint
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import GenerationConfig
+# [DDP change]
+import torch.distributed as dist
 from kv_packet.dataset import get_ret_eval_generator
 from kv_packet.utils.generate import GenerationCache, TokenizerType
 from kv_packet.packet_wrapper import PacketWrapper, WrapperStateDict
@@ -44,7 +48,6 @@ def format_duration(seconds: float) -> str:
 
 def print_duration(label: str, seconds: float) -> None:
     print(f"[Timing] {label}: {seconds:.3f} s ({format_duration(seconds)})")
-
 
 def print_sample_length_statistics(
     samples: list[TrainSample],
@@ -133,6 +136,54 @@ def print_sample_length_statistics(
     print("*" * 50)
 
 
+def init_distributed() -> tuple[bool, int, int, int]:
+    if "RANK" not in os.environ or "WORLD_SIZE" not in os.environ:
+        return False, 0, 1, 0
+
+    rank = int(os.environ["RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
+    local_rank = int(os.environ.get("LOCAL_RANK", rank))
+    if torch.cuda.is_available():
+        torch.cuda.set_device(local_rank)
+    backend = "nccl" if torch.cuda.is_available() else "gloo"
+
+    if not dist.is_initialized():
+        # dist.init_process_group(backend=backend)
+        dist.init_process_group(
+            backend=backend,
+            device_id=torch.device(f"cuda:{local_rank}") if backend == "nccl" else None,
+        )
+    return True, rank, world_size, local_rank
+
+
+def is_main_process(rank: int) -> bool:
+    return rank == 0
+
+
+def distributed_barrier(enabled: bool, local_rank: int = 0) -> None:
+    if enabled and dist.is_initialized():
+        if torch.cuda.is_available():
+            dist.barrier(device_ids=[local_rank])
+        else:
+            dist.barrier()
+        # dist.barrier()
+
+
+def average_packet_grads(
+    packet_wrapper: PacketWrapper,
+    enabled: bool,
+    world_size: int,
+) -> None:
+    if not enabled:
+        return
+
+    for param in (packet_wrapper.header, packet_wrapper.trailer):
+        if param.grad is None:
+            continue
+        dist.all_reduce(param.grad, op=dist.ReduceOp.SUM)
+        param.grad.div_(world_size)
+
+
 def train_wrapper_4d_batch(
     samples: list[TrainSample],
     model: SupportedModel,
@@ -149,6 +200,7 @@ def train_wrapper_4d_batch(
     forward_batch_size: int = -1,
     epoch: int = -1,
     epoch_indices: list[int]|None = None,
+    grad_sync_func: Callable[[], None]|None = None,
 ):
     # Freeze model parameters
     for param in model.parameters():
@@ -161,10 +213,27 @@ def train_wrapper_4d_batch(
     if batch_size % forward_batch_size != 0:
         raise ValueError("batch_size must be multiple of forward_batch_size")
 
-    if len(samples) % batch_size != 0:
-        raise ValueError("Number of samples must be multiple of batch_size")
+    # if len(samples) % batch_size != 0:
+    #     raise ValueError("Number of samples must be multiple of batch_size")
 
-    # No-op if main pre-filled cache; generates missing samples when called standalone.
+    # Training loop
+    train_step = 0
+    eval_tokens = 0
+    acc_loss = 0.0
+
+    # Shuffle samples
+    # rand_indices = list(range(num_samples))
+    # random.shuffle(rand_indices)
+    if epoch_indices is None:
+        epoch_indices = list(range(len(samples)))
+    else:
+        assert all(0 <= idx < len(samples) for idx in epoch_indices)
+
+    num_rank_samples = len(epoch_indices)
+    if num_rank_samples % batch_size != 0:
+        raise ValueError("Number of rank samples must be multiple of batch_size")
+
+    # Determine which samples need generation
     generation_cache = build_generation_cache(
         samples,
         gen_batch_size,
@@ -175,22 +244,22 @@ def train_wrapper_4d_batch(
         store_logits=use_logits,
     )
 
-    # Training loop
-    train_step = 0
-    eval_tokens = 0
-    acc_loss = 0.0
+    # # Training loop
+    # train_step = 0
+    # eval_tokens = 0
+    # acc_loss = 0.0
 
-    # Shuffle samples
-    num_samples = len(samples)
-    # rand_indices = list(range(num_samples))
-    # random.shuffle(rand_indices)
-    if epoch_indices is None:
-        epoch_indices = list(range(num_samples))
-    else:
-        assert len(epoch_indices) == num_samples
+    # # Shuffle samples
+    # num_samples = len(samples)
+    # # rand_indices = list(range(num_samples))
+    # # random.shuffle(rand_indices)
+    # if epoch_indices is None:
+    #     epoch_indices = list(range(num_samples))
+    # else:
+    #     assert len(epoch_indices) == num_samples
 
     batched_indices_list: list[list[int]] = []
-    for i in range(0, num_samples, forward_batch_size):
+    for i in range(0, num_rank_samples, forward_batch_size):
         batched_indices_list.append(epoch_indices[i: i + forward_batch_size])
 
     samples_bar = alive_it(batched_indices_list)
@@ -202,10 +271,10 @@ def train_wrapper_4d_batch(
     else:
         sliding_window = None
 
-    with alive_bar(total=num_samples, title="Training") as bar:
+    with alive_bar(total=num_rank_samples, title="Training") as bar:
         for batched_indices in batched_indices_list:
             batched_samples = [samples[idx] for idx in batched_indices]
-            samples_bar.text = f"Train step {train_step}/{len(samples)}" # type: ignore
+            samples_bar.text = f"Train step {train_step}/{num_rank_samples}" # type: ignore
             batch_input_embeds: list[torch.Tensor] = []
             batch_input_chunk_sizes: list[list[int]] = []
             batch_query_lens: list[int] = []
@@ -316,6 +385,9 @@ def train_wrapper_4d_batch(
             bar(forward_batch_size)
 
             if train_step % batch_size == 0:
+                # [DDP change]
+                if grad_sync_func is not None:
+                    grad_sync_func()
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()
@@ -341,6 +413,7 @@ def train_wrapper_4d(
     device: torch.device = torch.device("cuda:0"),
     epoch: int = -1,
     epoch_indices: list[int]|None = None,
+    grad_sync_func: Callable[[], None]|None = None,
 ):
     # Freeze model parameters
     for param in model.parameters():
@@ -372,15 +445,15 @@ def train_wrapper_4d(
     if epoch_indices is None:
         epoch_indices = list(range(len(samples)))
     else:
-        assert len(epoch_indices) == len(samples)
+        assert all(0 <= idx < len(samples) for idx in epoch_indices)
 
     samples_bar = alive_it(epoch_indices)
     samples_bar.title = f"Train epoch {epoch}" if epoch >= 0 else "Train" # type: ignore
 
-    # 逐个 sample 训练，“单样本 forward” 模式
+    
     for idx in samples_bar:
         sample = samples[idx]
-        samples_bar.text = f"Train step {train_step}/{len(samples)}" # type: ignore
+        samples_bar.text = f"Train step {train_step}/{len(epoch_indices)}" # type: ignore
         gen = generation_cache.get(sample_to_str(sample), device=device) # 从 cache 里取当前 sample 的生成结果 (sequences/logits)
         assert gen is not None
         assert len(gen["sequences"]) == 1
@@ -511,36 +584,32 @@ def train_wrapper_4d(
                 target=target_ids.reshape(-1),
             )
 
-        # 释放中间张量
         del outputs, logits, input_embed, packet_attn_mask
-        # 清理未使用的显存
         torch.cuda.empty_cache()
-        # 反向传播梯度，只有 wrapper 的 header/trailer 参数会更新
         loss.backward()
         acc_loss += loss.detach().item()
         train_step += 1
 
-        # 当已经处理了一个 batch 的样本后
-        # 进行一次优化器更新和学习率调度
+        
         if train_step % batch_size == 0:
-            # 执行优化器更新
+            # [DDP change]
+            if grad_sync_func is not None:
+                grad_sync_func()
             optimizer.step()
-            # 清零梯度
             optimizer.zero_grad()
-            # 学习率调度器更新
             scheduler.step()
-            # 取当前学习率
             lr = scheduler.get_last_lr()[0]
             print(f"eval tokens {eval_tokens}, loss {acc_loss / eval_tokens:.4f}, lr {lr:.3e}")
-            # 重置统计，准备下一个 batch
             eval_tokens = 0
             acc_loss = 0.0
-            # 减少内存碎片
             gc.collect()
             torch.cuda.empty_cache()
 
 
     if train_step % batch_size != 0:
+        # [DDP change]
+        if grad_sync_func is not None:
+            grad_sync_func()
         optimizer.step()
         optimizer.zero_grad()
         torch.cuda.empty_cache()
@@ -555,18 +624,30 @@ class TrainCache:
 def train_one_config(
     train_config: TrainConfig,
     train_cache: TrainCache,
+    distributed: bool = False, # [DDP change]
+    rank: int = 0, # [DDP change]
+    world_size: int = 1, # [DDP change]
+    local_rank: int = 0, # [DDP change]
 ):
-    print("Training configuration:")
-    pprint(train_config)
+    # [DDP change]
+    main_process = is_main_process(rank)
+    if main_process:
+        print("Training configuration:")
+        pprint(train_config)
 
-    if os.path.exists(train_config["save_path"]) is False:
-        os.makedirs(train_config["save_path"], exist_ok=True)
-
-    # 是否使用进程内缓存来重用 tokenizer / model
+    if main_process and os.path.exists(train_config["save_path"]) is False:
+       os.makedirs(train_config["save_path"], exist_ok=True)
+    distributed_barrier(distributed, local_rank)
+    
     use_cache = train_config["use_cache"]
 
-    # 根据配置确定模型加载的设备映射（支持 "auto"）
-    if train_config["model"]["device"] == "auto":
+    if distributed:
+        if not torch.cuda.is_available():
+            raise ValueError("Distributed training requires CUDA devices.")
+        torch.cuda.set_device(local_rank)
+        device_map = torch.device(f"cuda:{local_rank}")
+        model_device = torch.device(f"cuda:{local_rank}")
+    elif train_config["model"]["device"] == "auto":
         device_map: torch.device|str= "auto"
         model_device = torch.device("cuda:0")
     else:
@@ -576,13 +657,14 @@ def train_one_config(
     if model_device.type == "cuda":
         torch.cuda.set_device(model_device)
 
-    print(
-        f"Model device: {model_device}; "
-        f"current CUDA device: "
-        f"{torch.cuda.current_device() if torch.cuda.is_available() else 'N/A'}"
-    )
+    if main_process:
+        print(
+            f"Model device: {model_device}; "
+            f"current CUDA device: "
+            f"{torch.cuda.current_device() if torch.cuda.is_available() else 'N/A'}; "
+            f"distributed={distributed}, world_size={world_size}"
+        )
 
-    # 加载或从缓存取 tokenizer（并确保有 pad token，padding 方向为左）
     if not use_cache or train_cache.tokenizer_cache.get(train_config["model"]["model_path"]) is None:
         tokenizer: TokenizerType = AutoTokenizer.from_pretrained(
             train_config["model"]["model_path"],
@@ -642,7 +724,8 @@ def train_one_config(
     # 计算 embedding 的 mean/std（用于初始化 PacketWrapper 的分布参数）
     mean = torch.mean(model.model.embed_tokens.weight).item()
     std = torch.std(model.model.embed_tokens.weight).item()
-    print(f"Embedding mean: {mean:.3e}, std: {std:.3e}")
+    if main_process:
+        print(f"Embedding mean: {mean:.3e}, std: {std:.3e}")
 
     # wrapper 使用的 dtype：优先使用 train_config['dtype']，否则使用 model dtype
     wrapper_dtype = train_config["dtype"] if train_config["dtype"] is not None else train_config["model"]["dtype"]
@@ -673,11 +756,13 @@ def train_one_config(
                 ckpt_files.sort(key=lambda f: int(m.group(1)) if (m := re.search(r"\.epoch(\d+)$", f)) else -1)
                 resume_checkpoint = os.path.join(save_path, ckpt_files[-1])
             else:
-                print(f"No checkpoints found in {save_path}, starting from scratch.")
+                if main_process:
+                    print(f"No checkpoints found in {save_path}, starting from scratch.")
 
     if resume_checkpoint is not None:
         # 如果存在 checkpoint，载入 header/trailer 并通过 PacketWrapper.from_state_dict 恢复
-        print(f"Resuming from checkpoint: {resume_checkpoint}")
+        if main_process:
+            print(f"Resuming from checkpoint: {resume_checkpoint}")
         checkpoint = torch.load(resume_checkpoint, map_location=model_device)
         header = checkpoint["header"]
         trailer = checkpoint["trailer"]
@@ -706,9 +791,12 @@ def train_one_config(
         epoch_match = re.search(r"\.epoch(\d+)$", resume_checkpoint)
         assert epoch_match, "Could not parse epoch number from checkpoint filename."
         start_epoch = int(epoch_match.group(1))
-        print(f"Resuming from epoch: {start_epoch}")
+        if main_process:
+            print(f"Resuming from epoch: {start_epoch}")
     else:
-        # 未找到恢复点时，创建新的 PacketWrapper（header/trailer 由正态分布初始化）
+        torch.manual_seed(train_config["seed"])
+        if model_device.type == "cuda":
+            torch.cuda.manual_seed_all(train_config["seed"])
         assert model.config.hidden_size is not None, "Model config must have hidden_size defined."
         packet_wrapper = PacketWrapper(
             header_len=train_config["header_len"],
@@ -752,21 +840,28 @@ def train_one_config(
         )
         samples.extend([TrainSample(**sample,) for sample in eval_generator]) # type: ignore
 
-    # 样本统计与批次计算（用于构造 scheduler total iters）
     num_samples = len(samples) # 总样本数：biography256, hotpotqa512
-    print(f"Total training samples: {num_samples}")
+    if distributed:
+        if train_config["batch_size"] % world_size != 0:
+            raise ValueError("batch_size must be divisible by WORLD_SIZE for DDP training.")
+        if num_samples % world_size != 0:
+            raise ValueError("num_samples must be divisible by WORLD_SIZE for DDP training.")
+    
+    if main_process:
+        print(f"Total training samples: {num_samples}")
 
     # Report lengths after dataset filtering, sampling, and chat templating so
     # the statistics describe the exact samples used by this training run.
     # [Training-length stats change] This is diagnostic only; it does not affect training.
-    print_sample_length_statistics(
-        samples=samples,
-        tokenizer=tokenizer,
-        header_len=train_config["header_len"],
-        trailer_len=train_config["trailer_len"],
-    )
+    if main_process:
+        print_sample_length_statistics(
+            samples=samples,
+            tokenizer=tokenizer,
+            header_len=train_config["header_len"],
+            trailer_len=train_config["trailer_len"],
+        )
 
-    if num_samples % train_config["batch_size"] != 0:
+    if main_process and num_samples % train_config["batch_size"] != 0:
         print(f"Warning: number of samples {num_samples} is not divisible by batch size {train_config['batch_size']}.")
 
     iter_per_epoch = num_samples // train_config["batch_size"]
@@ -802,33 +897,38 @@ def train_one_config(
 
     # GenerationCache：根据 cache_path 载入或初始化
     cache_path = train_config["cache_path"]
+    if distributed and cache_path is None:
+        raise ValueError("DDP training requires cache_path so ranks can share teacher cache.")
     cache_load_start = perf_counter()
-    if cache_path is not None:
-        if os.path.exists(cache_path):
-            generation_cache = GenerationCache.load_from_file(cache_path, device=cache_device)
-            if cache_offload_dir is not None:
-                # [KVPacket disk-cache change] Convert legacy/resident cache to shards.
-                generation_cache.enable_offload(cache_offload_dir)
-            print(f"Loaded generation cache from {cache_path}, size: {len(generation_cache.cache)}")
+    
+    generation_cache: GenerationCache
+    if main_process:
+        if cache_path is not None:
+            if os.path.exists(cache_path):
+                generation_cache = GenerationCache.load_from_file(cache_path, device=cache_device)
+                if cache_offload_dir is not None:
+                    # [KVPacket disk-cache change] Convert legacy/resident cache to shards.
+                    generation_cache.enable_offload(cache_offload_dir)
+                print(f"Loaded generation cache from {cache_path}, size: {len(generation_cache.cache)}")
+            else:
+                generation_cache = GenerationCache(
+                    device=cache_device,
+                    # [KVPacket disk-cache change] New samples are written directly to shards.
+                    offload_dir=cache_offload_dir,
+                )
+                print(f"Initialized new generation cache at {cache_path}")
         else:
-            # generation_cache = GenerationCache(device=cache_device)
             generation_cache = GenerationCache(
                 device=cache_device,
-                # [KVPacket disk-cache change] New samples are written directly to shards.
+                # [KVPacket disk-cache change] Allows disk offload even without cache_path.
                 offload_dir=cache_offload_dir,
             )
-            print(f"Initialized new generation cache at {cache_path}")
+        cache_load_seconds = perf_counter() - cache_load_start
+        print_duration("Teacher cache load", cache_load_seconds)
     else:
-        # generation_cache = GenerationCache(device=cache_device)
-        generation_cache = GenerationCache(
-            device=cache_device,
-            # [KVPacket disk-cache change] Allows disk offload even without cache_path.
-            offload_dir=cache_offload_dir,
-        )
-    cache_load_seconds = perf_counter() - cache_load_start
-    print_duration("Teacher cache load", cache_load_seconds)
+        generation_cache = GenerationCache(device=cache_device, offload_dir=cache_offload_dir)
+        cache_load_seconds = 0.0
 
-    # 若配置了 generation kwargs，则构造 GenerationConfig
     if train_config['model']["generation_kwargs"]:
         generation_config = GenerationConfig(
             **train_config["model"]["generation_kwargs"]
@@ -836,58 +936,65 @@ def train_one_config(
     else:
         generation_config = None
 
-    # 读取常用训练参数到局部变量，方便传参
     batch_size = train_config["batch_size"]
     gen_batch_size = train_config["gen_batch_size"]
     forward_batch_size = train_config["forward_batch_size"]
     total_epoch = train_config["total_epoch"]
     use_logits = train_config["use_logits"] # True 时需要缓存 logits 以计算 KL-loss，否则生成的序列作为目标 token
     cache_path = train_config["cache_path"]
-
-    # 构建/更新 generation cache：只对缺失样本做生成并缓存
-    old_cache_len = len(generation_cache.cache)
-
-    # checkpoint
-    missing_teacher_samples = sum(
-        sample_to_str(sample) not in generation_cache
-        for sample in samples
-    )
-    print(
-        f"Teacher targets: {old_cache_len} cached, "
-        f"{missing_teacher_samples} to generate."
-    )
+    generation_cache_save_interval = train_config["generation_cache_save_interval"]
 
     synchronize_cuda(model_device)
     teacher_start = perf_counter()
 
-    generation_cache = build_generation_cache(
-        samples,
-        gen_batch_size,
-        model,
-        tokenizer,
-        generation_config,
-        generation_cache,
-        store_logits=use_logits,
-    )
-    new_cache_len = len(generation_cache.cache)
+    old_cache_len = 0
+    new_cache_len = 0
+    if main_process:
+        old_cache_len = len(generation_cache.cache)
+        missing_teacher_samples = sum(
+            sample_to_str(sample) not in generation_cache
+            for sample in samples
+        )
+        print(
+            f"Teacher targets: {old_cache_len} cached, "
+            f"{missing_teacher_samples} to generate."
+        )
 
-    # 若 cache 扩增并指定了 cache_path，则将更新后的 cache 存盘
-    if new_cache_len > old_cache_len and cache_path is not None:
-        cache_dir = os.path.dirname(cache_path)
-        if cache_dir:
-            os.makedirs(cache_dir, exist_ok=True)
-        torch.save(generation_cache.to_state_dict(), cache_path)
-        print(f"Saved updated generation cache to {cache_path}, size: {new_cache_len}")
+        generation_cache = build_generation_cache(
+            samples,
+            gen_batch_size,
+            model,
+            tokenizer,
+            generation_config,
+            generation_cache,
+            store_logits=use_logits,
+            cache_path=cache_path,
+            save_interval=generation_cache_save_interval,
+        )
+        new_cache_len = len(generation_cache.cache)
 
-    # checkpoint
-    synchronize_cuda(model_device)
-    teacher_seconds = perf_counter() - teacher_start
-    print_duration(
-        f"Teacher logits precompute ({new_cache_len - old_cache_len} samples)",
-        teacher_seconds,
-    )
+        if new_cache_len > old_cache_len and cache_path is not None:
+            cache_dir = os.path.dirname(cache_path)
+            if cache_dir:
+                os.makedirs(cache_dir, exist_ok=True)
+            torch.save(generation_cache.to_state_dict(), cache_path)
+            print(f"Saved updated generation cache to {cache_path}, size: {new_cache_len}")
+        synchronize_cuda(model_device)
+        teacher_seconds = perf_counter() - teacher_start
+        print_duration(
+            f"Teacher logits precompute ({new_cache_len - old_cache_len} samples)",
+            teacher_seconds,
+        )
+    else:
+        teacher_seconds = 0.0
+    
+    distributed_barrier(distributed, local_rank)
 
-    # checkpoing
+    if not main_process:
+        assert cache_path is not None
+        generation_cache = GenerationCache.load_from_file(cache_path, device=cache_device)
+        cache_load_seconds = perf_counter() - cache_load_start
+
     epoch_seconds: list[float] = []
     synchronize_cuda(model_device)
     training_start = perf_counter()
@@ -895,16 +1002,32 @@ def train_one_config(
     # 进入训练主循环：按 epoch 迭代，选择两种训练函数之一
     try:
         for epoch in range(start_epoch, total_epoch):
-            print(f"Epoch {epoch + 1}/{total_epoch}")
+            if main_process:
+                print(f"Epoch {epoch + 1}/{total_epoch}")
             synchronize_cuda(model_device)
             epoch_start = perf_counter()
             random.shuffle(epoch_indices) # 随机打乱样本索引
+            rank_epoch_indices = (
+                epoch_indices[rank::world_size]
+                if distributed
+                else epoch_indices
+            )
+            effective_batch_size = (
+                batch_size // world_size
+                if distributed
+                else batch_size
+            )
+            grad_sync_func = (
+                lambda: average_packet_grads(packet_wrapper, True, world_size)
+                if distributed
+                else None
+            )
             if forward_batch_size == 1: # this is faster for batch size 1
                 # 单样本 forward 路径，启用 gradient checkpointing 的实现
                 train_wrapper_4d(
                     samples=samples,
                     model=model,
-                    batch_size=batch_size,
+                    batch_size=effective_batch_size,
                     gen_batch_size=gen_batch_size,
                     use_logits=use_logits,
                     optimizer=optimizer,
@@ -915,14 +1038,15 @@ def train_one_config(
                     generation_config=generation_config,
                     device=model_device,
                     epoch=epoch,
-                    epoch_indices=epoch_indices,
+                    epoch_indices=rank_epoch_indices,
+                    grad_sync_func=grad_sync_func,
                 )
             else:
                 # 批量子 forward 路径：把一个 batch 划分为多个子 forward 以节省显存
                 train_wrapper_4d_batch(
                     samples=samples,
                     model=model,
-                    batch_size=batch_size,
+                    batch_size=effective_batch_size,
                     gen_batch_size=gen_batch_size,
                     use_logits=use_logits,
                     optimizer=optimizer,
@@ -934,60 +1058,67 @@ def train_one_config(
                     device=model_device,
                     forward_batch_size=forward_batch_size,
                     epoch=epoch,
-                    epoch_indices=epoch_indices,
+                    epoch_indices=rank_epoch_indices,
+                    grad_sync_func=grad_sync_func,
                 )
-            # 每个 epoch 后清理内存，并在配置的 ckpt 周期保存中间模型
             gc.collect()
             torch.cuda.empty_cache()
             synchronize_cuda(model_device)
             current_epoch_seconds = perf_counter() - epoch_start
             epoch_seconds.append(current_epoch_seconds)
-            print_duration(
-                f"Training epoch {epoch + 1}/{total_epoch}",
-                current_epoch_seconds,
-            )
-            if train_config["ckpt_epoch"] > 0 and (epoch + 1) % train_config["ckpt_epoch"] == 0 and (epoch + 1) < total_epoch:
+            if main_process:
+                print_duration(
+                    f"Training epoch {epoch + 1}/{total_epoch}",
+                    current_epoch_seconds,
+                )
+            if main_process and train_config["ckpt_epoch"] > 0 and (epoch + 1) % train_config["ckpt_epoch"] == 0 and (epoch + 1) < total_epoch:
                 state_dict = packet_wrapper.state_dict()
                 state_dict["train_config"] = train_config # type: ignore
                 torch.save(state_dict, f"{train_config['save_path']}/{train_config['file_name']}.epoch{epoch + 1}")
                 print(f"Saved checkpoint to {train_config['save_path']}/{train_config['file_name']}.epoch{epoch + 1}")
 
-        # 训练结束后保存最终 wrapper（包括 train_config）
-        state_dict = packet_wrapper.state_dict()
-        state_dict["train_config"] = train_config # type: ignore
-        torch.save(state_dict, f"{train_config['save_path']}/{train_config['file_name']}")
-        print(f"Saved trained packet to {train_config['save_path']}/{train_config['file_name']}")
-
+        if main_process:
+            state_dict = packet_wrapper.state_dict()
+            state_dict["train_config"] = train_config # type: ignore
+            torch.save(state_dict, f"{train_config['save_path']}/{train_config['file_name']}")
+            print(f"Saved trained packet to {train_config['save_path']}/{train_config['file_name']}")
         synchronize_cuda(model_device)
         training_stage_seconds = perf_counter() - training_start
         optimization_seconds = sum(epoch_seconds)
-
-        print("\n========== Timing Summary ==========")
-        print_duration("Teacher cache load", cache_load_seconds)
-        print_duration("Teacher logits precompute", teacher_seconds)
-        print_duration("Wrapper optimization total", optimization_seconds)
-        print_duration(
-            "Training stage wall time (including checkpoint I/O)",
-            training_stage_seconds,
-        )
-        if epoch_seconds:
+        
+        if main_process:
+            print("\n========== Timing Summary ==========")
+            print_duration("Teacher cache load", cache_load_seconds)
+            print_duration("Teacher logits precompute", teacher_seconds)
+            print_duration("Wrapper optimization total", optimization_seconds)
             print_duration(
-                "Average training time per epoch",
-                sum(epoch_seconds) / len(epoch_seconds),
+                "Training stage wall time (including checkpoint I/O)",
+                training_stage_seconds,
             )
-        print_duration(
-            "Teacher precompute + training stage",
-            teacher_seconds + training_stage_seconds,
-        )
-        print("====================================")
+            if epoch_seconds:
+                print_duration(
+                    "Average training time per epoch",
+                    sum(epoch_seconds) / len(epoch_seconds),
+                )
+            print_duration(
+                "Teacher precompute + training stage",
+                teacher_seconds + training_stage_seconds,
+            )
+            print("====================================")
 
     except KeyboardInterrupt:
-        # 中断处理：保存当前状态为 .interrupt 并退出
-        print("Training interrupted. Saving packet.")
-        state_dict = packet_wrapper.state_dict()
-        state_dict["train_config"] = train_config # type: ignore
-        torch.save(state_dict, f"{train_config['save_path']}/{train_config['file_name']}.interrupt")
-        print(f"Saved trained filler to {train_config['save_path']}/{train_config['file_name']}.interrupt")
+        synchronize_cuda(model_device)
+        interrupted_training_seconds = perf_counter() - training_start
+        print_duration(
+            "Wrapper training before interruption",
+            interrupted_training_seconds,
+        )
+        if main_process:
+            print("Training interrupted. Saving packet.")
+            state_dict = packet_wrapper.state_dict()
+            state_dict["train_config"] = train_config # type: ignore
+            torch.save(state_dict, f"{train_config['save_path']}/{train_config['file_name']}.interrupt")
+            print(f"Saved trained filler to {train_config['save_path']}/{train_config['file_name']}.interrupt")
         sys.exit(0)
 
 
@@ -1000,6 +1131,8 @@ if __name__ == "__main__":
         help="Path to the training configuration file (JSON format)."
     )
     args = parser.parse_args()
+
+    distributed, rank, world_size, local_rank = init_distributed()
 
     config_files_or_paths: list[str] = args.config_files_or_paths
     assert isinstance(config_files_or_paths, list)
@@ -1015,11 +1148,28 @@ if __name__ == "__main__":
         )) for config_file in all_config_files
     ]
 
-    print(f"Loaded {len(train_configs)} training configurations.")
-    for config_file in all_config_files:
-        print(f" - {config_file}")
+    if is_main_process(rank):
+        print(f"Loaded {len(train_configs)} training configurations.")
+        if distributed:
+            print(
+                f"Distributed training enabled: "
+                f"rank={rank}, world_size={world_size}, local_rank={local_rank}"
+            )
+        for config_file in all_config_files:
+            print(f" - {config_file}")
 
     train_cache = TrainCache()
 
-    for train_config in train_configs:
-        train_one_config(train_config, train_cache)
+    try:
+        for train_config in train_configs:
+            train_one_config(
+                train_config,
+                train_cache,
+                distributed=distributed,
+                rank=rank,
+                world_size=world_size,
+                local_rank=local_rank,
+            )
+    finally:
+        if distributed and dist.is_initialized():
+            dist.destroy_process_group()
