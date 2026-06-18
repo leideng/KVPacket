@@ -1,0 +1,174 @@
+
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+*****************************************
+Loaded 1 training configurations.
+Distributed training enabled: rank=0, world_size=2, local_rank=0
+ - packet_wrapper_config/qwen_3_8b/musique/8_8_ddp.json
+Training configuration:
+{
+│   'total_epoch': 10,
+│   'gen_batch_size': 2,
+│   'batch_size': 32,
+│   'forward_batch_size': 1,
+│   'header_len': 8,
+│   'trailer_len': 8,
+│   'dtype': 'float32',
+│   'use_logits': True,
+│   'use_cache': False,
+│   'model': {
+│   │   'model_path': '/public/models/Qwen3-8B',
+│   │   'dtype': 'bfloat16',
+│   │   'device': 'cuda:0',
+│   │   'generation_kwargs': {
+│   │   │   'max_new_tokens': 768,
+│   │   │   'stop_strings': ['<|im_end|>'],
+│   │   │   'do_sample': False,
+│   │   │   'use_cache': True
+│   │   }
+│   },
+│   'cache_device': 'disk',
+│   'cache_path': './generation_cache/qwen_3_8b/musique/8_8_64samples_768maxtokens.disk.pt',
+│   'generation_cache_save_interval': 8,
+│   'seed': 42,
+│   'save_path': './packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_ddp/',
+│   'file_name': '8_8_ddp.pt',
+│   'ckpt_epoch': 2,
+│   'opt_config': {'lr': 0.0005, 'weight_decay': 0.0},
+│   'scheduler_config': {'start_factor': 1.0, 'end_factor': 0.0},
+│   'data_configs': [
+│   │   {
+│   │   │   'dataset_name': 'musique',
+│   │   │   'num_data_strs': 0,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 64,
+│   │   │   'subset': 'default',
+│   │   │   'split': 'train',
+│   │   │   'seed': 0,
+│   │   │   'data_kwargs': {
+│   │   │   │   'add_inst': True,
+│   │   │   │   'add_cot': False,
+│   │   │   │   'answer_only': False
+│   │   │   },
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   }
+│   ],
+│   'resume': False,
+│   'resume_epoch': 2
+}
+Model device: cuda:0; current CUDA device: 0; distributed=True, world_size=2
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:17,  5.15it/s]Loading weights:   0%|          | 1/399 [00:00<01:06,  6.00it/s]Loading weights:   1%|          | 2/399 [00:00<01:12,  5.44it/s]Loading weights:   1%|          | 2/399 [00:00<01:24,  4.68it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:08, 42.73it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:09, 38.61it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:05, 63.70it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:06, 59.42it/s]Loading weights:  11%|█         | 43/399 [00:00<00:03, 90.45it/s]Loading weights:  11%|█         | 43/399 [00:00<00:04, 86.13it/s]Loading weights:  15%|█▍        | 59/399 [00:00<00:03, 104.58it/s]Loading weights:  15%|█▍        | 59/399 [00:00<00:03, 101.20it/s]Loading weights:  18%|█▊        | 71/399 [00:00<00:03, 105.67it/s]Loading weights:  18%|█▊        | 71/399 [00:00<00:03, 103.26it/s]Loading weights:  21%|██        | 83/399 [00:01<00:02, 105.37it/s]Loading weights:  21%|██        | 83/399 [00:01<00:02, 107.09it/s]Loading weights:  25%|██▌       | 100/399 [00:01<00:02, 122.19it/s]Loading weights:  25%|██▌       | 100/399 [00:01<00:02, 123.61it/s]Loading weights:  29%|██▊       | 114/399 [00:01<00:02, 123.93it/s]Loading weights:  28%|██▊       | 113/399 [00:01<00:02, 122.15it/s]Loading weights:  32%|███▏      | 126/399 [00:01<00:02, 121.25it/s]Loading weights:  32%|███▏      | 127/399 [00:01<00:02, 115.24it/s]Loading weights:  35%|███▍      | 139/399 [00:01<00:02, 121.66it/s]Loading weights:  36%|███▌      | 144/399 [00:01<00:01, 129.91it/s]Loading weights:  39%|███▉      | 155/399 [00:01<00:01, 131.25it/s]Loading weights:  40%|███▉      | 158/399 [00:01<00:01, 128.92it/s]Loading weights:  42%|████▏     | 169/399 [00:01<00:01, 128.40it/s]Loading weights:  43%|████▎     | 172/399 [00:01<00:01, 119.34it/s]Loading weights:  46%|████▌     | 182/399 [00:01<00:01, 118.18it/s]Loading weights:  47%|████▋     | 188/399 [00:01<00:01, 129.64it/s]Loading weights:  50%|████▉     | 199/399 [00:01<00:01, 129.96it/s]Loading weights:  51%|█████     | 202/399 [00:02<00:01, 127.68it/s]Loading weights:  54%|█████▎    | 214/399 [00:02<00:01, 126.77it/s]Loading weights:  54%|█████▍    | 216/399 [00:02<00:01, 130.67it/s]Loading weights:  58%|█████▊    | 232/399 [00:02<00:01, 140.50it/s]Loading weights:  58%|█████▊    | 230/399 [00:02<00:01, 132.80it/s]Loading weights:  62%|██████▏   | 246/399 [00:02<00:01, 135.89it/s]Loading weights:  62%|██████▏   | 247/399 [00:02<00:01, 130.09it/s]Loading weights:  65%|██████▌   | 260/399 [00:02<00:01, 126.63it/s]Loading weights:  65%|██████▌   | 261/399 [00:02<00:01, 130.79it/s]Loading weights:  70%|██████▉   | 279/399 [00:02<00:00, 136.31it/s]Loading weights:  70%|██████▉   | 278/399 [00:02<00:00, 133.31it/s]Loading weights:  73%|███████▎  | 293/399 [00:02<00:00, 125.91it/s]Loading weights:  73%|███████▎  | 292/399 [00:02<00:00, 123.94it/s]Loading weights:  78%|███████▊  | 311/399 [00:02<00:00, 131.58it/s]Loading weights:  78%|███████▊  | 312/399 [00:02<00:00, 135.12it/s]Loading weights:  81%|████████▏ | 325/399 [00:02<00:00, 122.63it/s]Loading weights:  82%|████████▏ | 326/399 [00:02<00:00, 125.00it/s]Loading weights:  85%|████████▌ | 341/399 [00:03<00:00, 130.52it/s]Loading weights:  85%|████████▌ | 341/399 [00:03<00:00, 131.25it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 136.11it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 135.58it/s]Loading weights:  93%|█████████▎| 370/399 [00:03<00:00, 130.68it/s]Loading weights:  93%|█████████▎| 370/399 [00:03<00:00, 130.61it/s]Loading weights:  97%|█████████▋| 386/399 [00:03<00:00, 137.57it/s]Loading weights:  97%|█████████▋| 386/399 [00:03<00:00, 137.97it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 116.76it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 114.79it/s]
+
+Embedding mean: 1.508e-05, std: 2.209e-02
+Total training samples: 64
+**************************************************
+Training input length statistics (tokens):
+  full input per sample: mean=2513.52, median=2447, p90=3318, p95=3532, min=1349, max=3702
+--------------------------------------------------
+  all documents per sample: mean=2410.92, median=2352, p90=3212, p95=3435, min=1248, max=3587
+--------------------------------------------------
+  individual document: mean=120.83, median=106, p90=214, p95=255, min=24, max=656
+--------------------------------------------------
+  document count per sample: mean=19.95, median=20, p90=20, p95=20, min=17, max=20
+--------------------------------------------------
+  KVPacket context per sample: mean=2836.52, median=2776, p90=3640, p95=3860, min=1670, max=4023
+**************************************************
+Loaded generation cache from ./generation_cache/qwen_3_8b/musique/8_8_64samples_768maxtokens.disk.pt, size: 64
+[Timing] Teacher cache load: 0.011 s (00:00:00)
+Teacher targets: 64 cached, 0 to generate.
+[Timing] Teacher logits precompute (0 samples): 0.001 s (00:00:00)
+Epoch 1/10
+on 15: rank 0, train step 16, eval tokens 7527, loss 0.8294, lr 4.750e-04
+on 15: rank 1, train step 16, eval tokens 7922, loss 0.8149, lr 4.750e-04
+on 31: rank 1, train step 32, eval tokens 9439, loss 0.8208, lr 4.500e-04
+on 31: rank 0, train step 32, eval tokens 10127, loss 0.8212, lr 4.500e-04
+|████████████████████████████████████████| 32/32 [100%] in 25.3s (1.27/s) 
+|████████████████████████████████████████| 32/32 [100%] in 25.5s (1.25/s) 
+[Timing] Training epoch 1/10: 25.725 s (00:00:26)
+Epoch 2/10
+on 15: rank 1, train step 16, eval tokens 7431, loss 0.6794, lr 4.250e-04
+on 15: rank 0, train step 16, eval tokens 10163, loss 0.6930, lr 4.250e-04
+on 31: rank 1, train step 32, eval tokens 7840, loss 0.5975, lr 4.000e-04
+on 31: rank 0, train step 32, eval tokens 9581, loss 0.5835, lr 4.000e-04
+|████████████████████████████████████████| 32/32 [100%] in 22.5s (1.42/s) 
+|████████████████████████████████████████| 32/32 [100%] in 22.5s (1.42/s) 
+[Timing] Training epoch 2/10: 22.666 s (00:00:23)
+Saved checkpoint to ./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_ddp//8_8_ddp.pt.epoch2
+Epoch 3/10
+on 15: rank 1, train step 16, eval tokens 8496, loss 0.6351, lr 3.750e-04
+on 15: rank 0, train step 16, eval tokens 9719, loss 0.5687, lr 3.750e-04
+on 31: rank 1, train step 32, eval tokens 8001, loss 0.5682, lr 3.500e-04
+on 31: rank 0, train step 32, eval tokens 8799, loss 0.5679, lr 3.500e-04
+|████████████████████████████████████████| 32/32 [100%] in 21.6s (1.48/s) 
+|████████████████████████████████████████| 32/32 [100%] in 21.6s (1.48/s) 
+[Timing] Training epoch 3/10: 21.767 s (00:00:22)
+Epoch 4/10
+on 15: rank 1, train step 16, eval tokens 8161, loss 0.6199, lr 3.250e-04
+on 15: rank 0, train step 16, eval tokens 10494, loss 0.5167, lr 3.250e-04
+on 31: rank 1, train step 32, eval tokens 9098, loss 0.5315, lr 3.000e-04
+on 31: rank 0, train step 32, eval tokens 7262, loss 0.5776, lr 3.000e-04
+|████████████████████████████████████████| 32/32 [100%] in 22.3s (1.44/s) 
+|████████████████████████████████████████| 32/32 [100%] in 22.2s (1.44/s) 
+[Timing] Training epoch 4/10: 22.384 s (00:00:22)
+Saved checkpoint to ./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_ddp//8_8_ddp.pt.epoch4
+Epoch 5/10
+on 15: rank 1, train step 16, eval tokens 8901, loss 0.5451, lr 2.750e-04
+on 15: rank 0, train step 16, eval tokens 9526, loss 0.5959, lr 2.750e-04
+on 31: rank 1, train step 32, eval tokens 8488, loss 0.5058, lr 2.500e-04
+on 31: rank 0, train step 32, eval tokens 8100, loss 0.5168, lr 2.500e-04
+|████████████████████████████████████████| 32/32 [100%] in 22.0s (1.46/s) 
+|████████████████████████████████████████| 32/32 [100%] in 22.0s (1.45/s) 
+[Timing] Training epoch 5/10: 22.167 s (00:00:22)
+Epoch 6/10
+on 15: rank 1, train step 16, eval tokens 9039, loss 0.5194, lr 2.250e-04
+on 15: rank 0, train step 16, eval tokens 9282, loss 0.5398, lr 2.250e-04
+on 31: rank 0, train step 32, eval tokens 7886, loss 0.5486, lr 2.000e-04
+on 31: rank 1, train step 32, eval tokens 8808, loss 0.5125, lr 2.000e-04
+|████████████████████████████████████████| 32/32 [100%] in 25.0s (1.28/s) 
+[Timing] Training epoch 6/10: 25.161 s (00:00:25)
+Saved checkpoint to ./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_ddp//8_8_ddp.pt.epoch6
+Epoch 7/10
+|████████████████████████████████████████| 32/32 [100%] in 25.4s (1.26/s) 
+on 15: rank 1, train step 16, eval tokens 8281, loss 0.5551, lr 1.750e-04
+on 15: rank 0, train step 16, eval tokens 9977, loss 0.5262, lr 1.750e-04
+on 31: rank 1, train step 32, eval tokens 9005, loss 0.5014, lr 1.500e-04
+on 31: rank 0, train step 32, eval tokens 7752, loss 0.4960, lr 1.500e-04
+|████████████████████████████████████████| 32/32 [100%] in 21.1s (1.52/s) 
+|████████████████████████████████████████| 32/32 [100%] in 21.4s (1.49/s) 
+[Timing] Training epoch 7/10: 21.758 s (00:00:22)
+Epoch 8/10
+on 15: rank 1, train step 16, eval tokens 8059, loss 0.4808, lr 1.250e-04
+on 15: rank 0, train step 16, eval tokens 8846, loss 0.5557, lr 1.250e-04
+on 31: rank 1, train step 32, eval tokens 8690, loss 0.5190, lr 1.000e-04
+on 31: rank 0, train step 32, eval tokens 9420, loss 0.4957, lr 1.000e-04
+|████████████████████████████████████████| 32/32 [100%] in 22.0s (1.45/s) 
+|████████████████████████████████████████| 32/32 [100%] in 21.9s (1.46/s) 
+[Timing] Training epoch 8/10: 22.136 s (00:00:22)
+Saved checkpoint to ./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_ddp//8_8_ddp.pt.epoch8
+Epoch 9/10
+on 15: rank 1, train step 16, eval tokens 9013, loss 0.5345, lr 7.500e-05
+on 15: rank 0, train step 16, eval tokens 8185, loss 0.4932, lr 7.500e-05
+on 31: rank 1, train step 32, eval tokens 8699, loss 0.5070, lr 5.000e-05
+on 31: rank 0, train step 32, eval tokens 9118, loss 0.5005, lr 5.000e-05
+|████████████████████████████████████████| 32/32 [100%] in 21.1s (1.51/s) 
+|████████████████████████████████████████| 32/32 [100%] in 21.1s (1.52/s) 
+[Timing] Training epoch 9/10: 21.260 s (00:00:21)
+Epoch 10/10
+on 15: rank 1, train step 16, eval tokens 8675, loss 0.5167, lr 2.500e-05
+on 15: rank 0, train step 16, eval tokens 9358, loss 0.4778, lr 2.500e-05
+on 31: rank 1, train step 32, eval tokens 8841, loss 0.5072, lr 0.000e+00
+on 31: rank 0, train step 32, eval tokens 8141, loss 0.5254, lr 0.000e+00
+|████████████████████████████████████████| 32/32 [100%] in 21.6s (1.48/s) 
+|████████████████████████████████████████| 32/32 [100%] in 21.6s (1.48/s) 
+[Timing] Training epoch 10/10: 21.682 s (00:00:22)
+Saved trained packet to ./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_ddp//8_8_ddp.pt
+
+========== Timing Summary ==========
+[Timing] Teacher cache load: 0.011 s (00:00:00)
+[Timing] Teacher logits precompute: 0.001 s (00:00:00)
+[Timing] Wrapper optimization total: 226.707 s (00:03:47)
+[Timing] Training stage wall time (including checkpoint I/O): 226.757 s (00:03:47)
+[Timing] Average training time per epoch: 22.671 s (00:00:23)
+[Timing] Teacher precompute + training stage: 226.758 s (00:03:47)
+====================================
