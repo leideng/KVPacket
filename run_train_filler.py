@@ -378,10 +378,25 @@ def train_wrapper_4d_batch(
 
                 loss = (loss * eval_mask.reshape(-1)).sum()
 
+            del (
+                outputs,
+                input_embed,
+                packet_attn_mask,
+                eval_mask,
+                batch_input_embeds,
+                logits_to_eval,
+            )
+            if use_logits:
+                del target_logits
+            else:
+                del target_ids
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
+
             # Gradient accumulation: d/dθ(Σ L_i) = Σ dL_i/dθ; backward per forward_batch_size
             # matches one backward on the summed loss (grads accumulate in .grad).
             loss.backward()
-            acc_loss += loss.item()  # logging only not for backward pass (gradient accumulation)
+            acc_loss += loss.detach().item()  # logging only not for backward pass (gradient accumulation)
 
             train_step += forward_batch_size
             bar(forward_batch_size)
@@ -397,6 +412,9 @@ def train_wrapper_4d_batch(
                 print(f"rank {dist.get_rank()}, train step {train_step}, eval tokens {eval_tokens}, loss {acc_loss / eval_tokens:.4f}, lr {lr:.3e}")
                 eval_tokens = 0
                 acc_loss = 0.0
+                gc.collect()
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
 
 
 def train_wrapper_4d(
