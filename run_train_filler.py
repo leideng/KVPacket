@@ -206,6 +206,7 @@ def train_wrapper_4d_batch(
     for param in model.parameters():
         param.requires_grad = False
     model.eval()
+    model.gradient_checkpointing_enable()
 
     if forward_batch_size <= 0:
         forward_batch_size = batch_size
