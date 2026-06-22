@@ -2,7 +2,7 @@
     "total_epoch": 60,
     "batch_size": 64,
     "gen_batch_size": 2,
-    "forward_batch_size": 4,
+    "forward_batch_size": 2,
     "header_len": 8,
     "trailer_len": 8,
     "use_logits": true,
