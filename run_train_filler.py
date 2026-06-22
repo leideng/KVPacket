@@ -318,15 +318,16 @@ def train_wrapper_4d_batch(
             # (NOTE) Here we do not reuse precomputed KV caches; 
             # instead we use sparse attention with given mask
             # to minic the KV cache reuse behavior;
+            # Only run lm_head on the generation tail; avoids materializing
+            # [batch, full_seq_len, vocab_size] logits for long document contexts.
             outputs = model(
                 inputs_embeds=input_embed,
                 attention_mask=packet_attn_mask,
+                logits_to_keep=max_gen_seq_len,
             )
 
-            logits = outputs.logits
-            assert isinstance(logits, torch.Tensor) # [f_batch_size, seq_len, vocab_size]
-
-            logits_to_eval = logits[:, -max_gen_seq_len:, :]
+            logits_to_eval = outputs.logits
+            assert isinstance(logits_to_eval, torch.Tensor)  # [f_batch_size, max_gen_seq_len, vocab_size]
             num_tokens = int(eval_mask.sum().item())
             eval_tokens += num_tokens
 
@@ -542,18 +543,18 @@ def train_wrapper_4d(
         # 将所有 chunk embedding 和 query embedding 拼接成一个大输入
         input_embed = torch.cat(input_embed_list, dim=1)
 
-        # 前向计算模型 logits
+        # 前向计算模型 logits（仅对生成尾部的 gen_seq_len 个位置计算 lm_head）
         outputs = model(
             inputs_embeds=input_embed,
             attention_mask=packet_attn_mask,
+            logits_to_keep=gen_seq_len,
         )
-        logits = outputs.logits
+        logits_to_eval = outputs.logits
 
         # gen_seq 是为该 sample 预先生成并缓存的参考生成序列 (token id)
         # 训练任务是让模型重现这个序列或者它的 logits，所以 gen_seq 是目标序列
         # 最后连续的 gen_seq_len 个 token 是需要评估的生成部分，计算 loss 时只评估这部分
-        assert isinstance(logits, torch.Tensor)
-        logits_to_eval = logits[:, -gen_seq_len:, :]
+        assert isinstance(logits_to_eval, torch.Tensor)  # [1, gen_seq_len, vocab_size]
 
         # 统计本次训练消耗的 eval token 数量
         num_tokens = logits_to_eval.size(1)
@@ -584,7 +585,7 @@ def train_wrapper_4d(
                 target=target_ids.reshape(-1),
             )
 
-        del outputs, logits, input_embed, packet_attn_mask
+        del outputs, logits_to_eval, input_embed, packet_attn_mask
         torch.cuda.empty_cache()
         loss.backward()
         acc_loss += loss.detach().item()
