@@ -302,7 +302,8 @@ def batched_packet_4d_mask(
     max_seq_len = max(mask.size(-1) for mask in mask_list)
     batch_size = len(mask_list)
 
-    # could result in OOM if max_seq_len is too large
+    # could result in OOM if max_seq_len is too large; 
+    # (NOTE) try to reduce forward_batch_size and eventually to be 1 if OOM
     # padded_masks: (batch_size, 1, max_seq_len, max_seq_len), dtype=bool (1 byte/elem)
     # | max_seq_len | batch=1 | batch=8 | batch=16 |
     # |-------------|---------|---------|----------|
