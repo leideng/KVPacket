@@ -441,7 +441,8 @@ def prepare_sample_input(
         assert isinstance(context_ids, torch.Tensor)
 
         input_chunk_sizes.append(context_ids.size(1))
-        context_embed = model.model.embed_tokens(context_ids.to(device))
+        with torch.no_grad():
+            context_embed = model.model.embed_tokens(context_ids.to(device))
         input_embed_list.append(context_embed)
     
     for data_str in sample["documents"]:
@@ -453,7 +454,8 @@ def prepare_sample_input(
         data_ids = data_input["input_ids"]
         assert isinstance(data_ids, torch.Tensor)
 
-        data_embed = model.model.embed_tokens(data_ids.to(device))
+        with torch.no_grad():
+            data_embed = model.model.embed_tokens(data_ids.to(device))
         wrapped_data_embed = packet_wrapper.wrap(data_embed)
 
         input_chunk_sizes.append(wrapped_data_embed.size(1))
@@ -475,7 +477,8 @@ def prepare_sample_input(
     query_len = query_ids.size(1)
     gen_seq_len = gen_seq.size(0)
 
-    query_embed = model.model.embed_tokens(query_ids)
+    with torch.no_grad():
+        query_embed = model.model.embed_tokens(query_ids)
     input_embed_list.append(query_embed)
 
     input_embed = torch.cat(input_embed_list, dim=1)
