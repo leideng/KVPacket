@@ -221,3 +221,4 @@ __marimo__/
 uv.lock
 nohup.out
 generation_cache/
+generation_cache
