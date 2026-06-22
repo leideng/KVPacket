@@ -1,0 +1,258 @@
+
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+*****************************************
+Loaded 1 training configurations.
+Distributed training enabled: rank=0, world_size=8, local_rank=0
+ - packet_wrapper_config/qwen_3_8b/musique/8_8_disk.json
+Training configuration:
+{
+│   'total_epoch': 60,
+│   'gen_batch_size': 2,
+│   'batch_size': 64,
+│   'forward_batch_size': 4,
+│   'header_len': 8,
+│   'trailer_len': 8,
+│   'dtype': 'float32',
+│   'use_logits': True,
+│   'use_cache': False,
+│   'model': {
+│   │   'model_path': '/public/models/Qwen3-8B',
+│   │   'dtype': 'bfloat16',
+│   │   'device': 'cuda:0',
+│   │   'generation_kwargs': {
+│   │   │   'max_new_tokens': 1536,
+│   │   │   'stop_strings': ['<|im_end|>'],
+│   │   │   'do_sample': False,
+│   │   │   'use_cache': True
+│   │   }
+│   },
+│   'cache_device': 'disk',
+│   'cache_path': './generation_cache/qwen_3_8b/musique/8_8_10048samples_1536maxtokens.disk.pt',
+│   'generation_cache_save_interval': 8,
+│   'seed': 42,
+│   'save_path': './packet_wrapper/qwen_3_8b/musique/num_samples_10048_max_tokens_1536_lr1e-5_disk/',
+│   'file_name': '8_8_disk.pt',
+│   'ckpt_epoch': 2,
+│   'opt_config': {'lr': 1e-05, 'weight_decay': 0.0},
+│   'scheduler_config': {'start_factor': 1.0, 'end_factor': 0.0},
+│   'data_configs': [
+│   │   {
+│   │   │   'dataset_name': 'musique',
+│   │   │   'num_data_strs': 0,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 10048,
+│   │   │   'subset': 'default',
+│   │   │   'split': 'train',
+│   │   │   'seed': 0,
+│   │   │   'data_kwargs': {
+│   │   │   │   'add_inst': True,
+│   │   │   │   'add_cot': False,
+│   │   │   │   'answer_only': False
+│   │   │   },
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   }
+│   ],
+│   'resume': False,
+│   'resume_epoch': None
+}
+Model device: cuda:0; current CUDA device: 0; distributed=True, world_size=8
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<01:14,  5.33it/s]Loading weights:   0%|          | 1/399 [00:00<01:20,  4.97it/s]Loading weights:   0%|          | 1/399 [00:00<01:23,  4.74it/s]Loading weights:   0%|          | 1/399 [00:00<01:22,  4.82it/s]Loading weights:   1%|          | 2/399 [00:00<01:26,  4.59it/s]Loading weights:   1%|          | 2/399 [00:00<01:31,  4.36it/s]Loading weights:   1%|          | 2/399 [00:00<01:23,  4.77it/s]Loading weights:   0%|          | 1/399 [00:00<03:15,  2.04it/s]Loading weights:   0%|          | 1/399 [00:00<03:20,  1.99it/s]Loading weights:   1%|          | 2/399 [00:00<01:34,  4.20it/s]Loading weights:   4%|▍         | 16/399 [00:00<00:09, 41.26it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:10, 37.63it/s]Loading weights:   4%|▍         | 16/399 [00:00<00:08, 43.13it/s]Loading weights:   0%|          | 1/399 [00:00<03:31,  1.89it/s]Loading weights:   0%|          | 1/399 [00:00<03:31,  1.88it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:11, 32.07it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:12, 31.53it/s]Loading weights:   4%|▍         | 16/399 [00:00<00:10, 37.88it/s]Loading weights:   8%|▊         | 32/399 [00:00<00:04, 73.88it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:06, 59.41it/s]Loading weights:   9%|▉         | 37/399 [00:00<00:04, 87.48it/s]Loading weights:   4%|▎         | 14/399 [00:00<00:13, 27.92it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:13, 28.74it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:07, 52.45it/s]Loading weights:   7%|▋         | 28/399 [00:00<00:06, 59.08it/s]Loading weights:   7%|▋         | 28/399 [00:00<00:06, 53.32it/s]Loading weights:  10%|▉         | 39/399 [00:00<00:04, 75.24it/s]Loading weights:  12%|█▏        | 49/399 [00:00<00:03, 95.90it/s]Loading weights:  13%|█▎        | 50/399 [00:00<00:03, 96.35it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:07, 49.51it/s]Loading weights:  10%|▉         | 39/399 [00:00<00:05, 68.41it/s]Loading weights:   7%|▋         | 28/399 [00:00<00:07, 48.85it/s]Loading weights:  12%|█▏        | 48/399 [00:00<00:03, 92.63it/s]Loading weights:  12%|█▏        | 48/399 [00:00<00:04, 85.36it/s]Loading weights:  15%|█▌        | 61/399 [00:00<00:03, 102.37it/s]Loading weights:  15%|█▍        | 59/399 [00:00<00:03, 104.43it/s]Loading weights:  17%|█▋        | 69/399 [00:00<00:02, 122.24it/s]Loading weights:  10%|▉         | 39/399 [00:00<00:05, 63.45it/s]Loading weights:  11%|█         | 43/399 [00:00<00:04, 71.67it/s]Loading weights:  15%|█▍        | 58/399 [00:00<00:03, 95.83it/s]Loading weights:  15%|█▌        | 60/399 [00:00<00:03, 99.96it/s]Loading weights:  19%|█▉        | 76/399 [00:00<00:02, 115.85it/s]Loading weights:  18%|█▊        | 71/399 [00:00<00:03, 107.98it/s]Loading weights:  15%|█▌        | 61/399 [00:00<00:03, 90.36it/s]Loading weights:  14%|█▍        | 56/399 [00:00<00:03, 88.66it/s]Loading weights:  15%|█▍        | 59/399 [00:01<00:04, 82.21it/s]Loading weights:  18%|█▊        | 72/399 [00:01<00:03, 91.21it/s]Loading weights:  18%|█▊        | 71/399 [00:01<00:03, 87.83it/s]Loading weights:  21%|██        | 83/399 [00:01<00:03, 94.64it/s] Loading weights:  22%|██▏       | 89/399 [00:01<00:03, 101.14it/s]Loading weights:  18%|█▊        | 73/399 [00:01<00:03, 86.97it/s]Loading weights:  21%|██        | 83/399 [00:01<00:03, 93.60it/s] Loading weights:  17%|█▋        | 68/399 [00:01<00:03, 90.94it/s]Loading weights:  18%|█▊        | 71/399 [00:01<00:03, 88.64it/s]Loading weights:  25%|██▍       | 98/399 [00:01<00:02, 107.03it/s]Loading weights:  21%|██        | 83/399 [00:01<00:03, 93.37it/s]Loading weights:  23%|██▎       | 92/399 [00:01<00:02, 113.97it/s]Loading weights:  22%|██▏       | 89/399 [00:01<00:02, 103.35it/s]Loading weights:  25%|██▌       | 101/399 [00:01<00:02, 101.64it/s]Loading weights:  26%|██▌       | 103/399 [00:01<00:02, 116.02it/s]Loading weights:  20%|██        | 81/399 [00:01<00:03, 97.41it/s]Loading weights:  21%|██        | 83/399 [00:01<00:03, 93.18it/s]Loading weights:  28%|██▊       | 111/399 [00:01<00:02, 99.74it/s]Loading weights:  25%|██▍       | 98/399 [00:01<00:03, 96.54it/s]Loading weights:  28%|██▊       | 112/399 [00:01<00:02, 97.85it/s] Loading weights:  25%|██▌       | 101/399 [00:01<00:03, 98.62it/s]Loading weights:  26%|██▋       | 105/399 [00:01<00:02, 98.47it/s]Loading weights:  23%|██▎       | 93/399 [00:01<00:03, 88.51it/s]Loading weights:  29%|██▉       | 116/399 [00:01<00:02, 99.46it/s] Loading weights:  24%|██▎       | 94/399 [00:01<00:03, 88.24it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:02, 102.93it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:02, 105.14it/s]Loading weights:  29%|██▉       | 115/399 [00:01<00:02, 103.87it/s]Loading weights:  28%|██▊       | 113/399 [00:01<00:02, 102.63it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:02, 117.18it/s]Loading weights:  34%|███▎      | 134/399 [00:01<00:02, 117.93it/s]Loading weights:  26%|██▋       | 105/399 [00:01<00:03, 92.67it/s]Loading weights:  27%|██▋       | 109/399 [00:01<00:02, 102.57it/s]Loading weights:  34%|███▍      | 137/399 [00:01<00:02, 106.17it/s]Loading weights:  32%|███▏      | 127/399 [00:01<00:02, 110.53it/s]Loading weights:  34%|███▍      | 137/399 [00:01<00:02, 102.97it/s]Loading weights:  32%|███▏      | 127/399 [00:01<00:02, 105.90it/s]Loading weights:  31%|███       | 122/399 [00:01<00:02, 111.16it/s]Loading weights:  37%|███▋      | 147/399 [00:01<00:02, 118.59it/s]Loading weights:  35%|███▍      | 138/399 [00:01<00:02, 112.14it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:02, 114.48it/s]Loading weights:  37%|███▋      | 149/399 [00:01<00:02, 106.98it/s]Loading weights:  37%|███▋      | 149/399 [00:01<00:02, 107.43it/s]Loading weights:  37%|███▋      | 147/399 [00:01<00:01, 126.47it/s]Loading weights:  36%|███▋      | 145/399 [00:01<00:02, 118.95it/s]Loading weights:  34%|███▍      | 135/399 [00:01<00:02, 112.98it/s]Loading weights:  40%|███▉      | 158/399 [00:01<00:01, 128.14it/s]Loading weights:  40%|████      | 160/399 [00:01<00:02, 113.94it/s]Loading weights:  35%|███▍      | 138/399 [00:01<00:02, 110.79it/s]Loading weights:  41%|████      | 164/399 [00:01<00:02, 102.38it/s]Loading weights:  41%|████      | 164/399 [00:01<00:02, 101.89it/s]Loading weights:  40%|███▉      | 159/399 [00:01<00:02, 109.31it/s]Loading weights:  40%|████      | 161/399 [00:01<00:02, 108.78it/s]Loading weights:  37%|███▋      | 147/399 [00:01<00:02, 104.29it/s]Loading weights:  43%|████▎     | 172/399 [00:01<00:02, 103.97it/s]Loading weights:  43%|████▎     | 172/399 [00:01<00:02, 112.72it/s]Loading weights:  38%|███▊      | 150/399 [00:01<00:02, 100.39it/s]Loading weights:  45%|████▍     | 179/399 [00:01<00:01, 110.74it/s]Loading weights:  45%|████▌     | 180/399 [00:01<00:01, 111.86it/s]Loading weights:  44%|████▍     | 175/399 [00:01<00:01, 120.27it/s]Loading weights:  45%|████▌     | 180/399 [00:02<00:01, 125.84it/s]Loading weights:  40%|███▉      | 159/399 [00:01<00:02, 103.05it/s]Loading weights:  47%|████▋     | 188/399 [00:02<00:01, 116.81it/s]Loading weights:  47%|████▋     | 189/399 [00:01<00:01, 125.86it/s]Loading weights:  41%|████      | 164/399 [00:02<00:02, 108.03it/s]Loading weights:  48%|████▊     | 193/399 [00:02<00:01, 112.67it/s]Loading weights:  48%|████▊     | 193/399 [00:02<00:01, 113.11it/s]Loading weights:  48%|████▊     | 192/399 [00:02<00:01, 128.93it/s]Loading weights:  49%|████▊     | 194/399 [00:02<00:01, 125.35it/s]Loading weights:  43%|████▎     | 170/399 [00:02<00:02, 101.33it/s]Loading weights:  51%|█████     | 203/399 [00:02<00:01, 120.11it/s]Loading weights:  51%|█████     | 203/399 [00:02<00:01, 127.08it/s]Loading weights:  45%|████▌     | 180/399 [00:02<00:01, 116.77it/s]Loading weights:  53%|█████▎    | 210/399 [00:02<00:01, 127.66it/s]Loading weights:  53%|█████▎    | 210/399 [00:02<00:01, 126.07it/s]Loading weights:  52%|█████▏    | 206/399 [00:02<00:01, 127.71it/s]Loading weights:  53%|█████▎    | 210/399 [00:02<00:01, 132.53it/s]Loading weights:  47%|████▋     | 188/399 [00:02<00:01, 121.78it/s]Loading weights:  54%|█████▍    | 216/399 [00:02<00:01, 119.70it/s]Loading weights:  54%|█████▍    | 217/399 [00:02<00:01, 127.38it/s]Loading weights:  48%|████▊     | 193/399 [00:02<00:01, 112.66it/s]Loading weights:  56%|█████▌    | 224/399 [00:02<00:01, 129.87it/s]Loading weights:  56%|█████▌    | 222/399 [00:02<00:01, 135.86it/s]Loading weights:  56%|█████▋    | 225/399 [00:02<00:01, 125.98it/s]Loading weights:  56%|█████▌    | 224/399 [00:02<00:01, 132.52it/s]Loading weights:  51%|█████     | 202/399 [00:02<00:01, 126.22it/s]Loading weights:  58%|█████▊    | 230/399 [00:02<00:01, 123.01it/s]Loading weights:  58%|█████▊    | 231/399 [00:02<00:01, 128.93it/s]Loading weights:  53%|█████▎    | 210/399 [00:02<00:01, 126.59it/s]Loading weights:  60%|█████▉    | 238/399 [00:02<00:01, 122.53it/s]Loading weights:  60%|█████▉    | 238/399 [00:02<00:01, 121.17it/s]Loading weights:  59%|█████▉    | 236/399 [00:02<00:01, 126.77it/s]Loading weights:  60%|█████▉    | 238/399 [00:02<00:01, 123.67it/s]Loading weights:  54%|█████▍    | 215/399 [00:02<00:01, 115.91it/s]Loading weights:  62%|██████▏   | 246/399 [00:02<00:01, 126.84it/s]Loading weights:  62%|██████▏   | 246/399 [00:02<00:01, 128.49it/s]Loading weights:  56%|█████▌    | 224/399 [00:02<00:01, 124.71it/s]Loading weights:  62%|██████▏   | 249/399 [00:02<00:01, 123.66it/s]Loading weights:  64%|██████▍   | 257/399 [00:02<00:01, 131.51it/s]Loading weights:  64%|██████▍   | 257/399 [00:02<00:01, 132.62it/s]Loading weights:  64%|██████▎   | 254/399 [00:02<00:01, 131.53it/s]Loading weights:  57%|█████▋    | 229/399 [00:02<00:01, 122.02it/s]Loading weights:  65%|██████▍   | 259/399 [00:02<00:01, 117.62it/s]Loading weights:  65%|██████▌   | 260/399 [00:02<00:01, 121.24it/s]Loading weights:  59%|█████▉    | 237/399 [00:02<00:01, 116.14it/s]Loading weights:  66%|██████▌   | 263/399 [00:02<00:01, 127.24it/s]Loading weights:  67%|██████▋   | 268/399 [00:02<00:01, 130.55it/s]Loading weights:  62%|██████▏   | 246/399 [00:02<00:01, 129.78it/s]Loading weights:  68%|██████▊   | 271/399 [00:02<00:01, 119.28it/s]Loading weights:  68%|██████▊   | 271/399 [00:02<00:01, 119.82it/s]Loading weights:  69%|██████▊   | 274/399 [00:02<00:01, 124.39it/s]Loading weights:  69%|██████▊   | 274/399 [00:02<00:01, 124.42it/s]Loading weights:  64%|██████▎   | 254/399 [00:02<00:01, 129.07it/s]Loading weights:  70%|███████   | 280/399 [00:02<00:00, 129.86it/s]Loading weights:  71%|███████   | 282/399 [00:02<00:00, 123.24it/s]Loading weights:  71%|███████   | 284/399 [00:02<00:00, 120.11it/s]Loading weights:  71%|███████   | 284/399 [00:02<00:00, 120.53it/s]Loading weights:  65%|██████▌   | 260/399 [00:02<00:01, 121.16it/s]Loading weights:  72%|███████▏  | 287/399 [00:02<00:00, 122.56it/s]Loading weights:  72%|███████▏  | 287/399 [00:02<00:00, 122.44it/s]Loading weights:  67%|██████▋   | 268/399 [00:02<00:01, 129.43it/s]Loading weights:  74%|███████▎  | 294/399 [00:02<00:00, 126.26it/s]Loading weights:  74%|███████▍  | 296/399 [00:02<00:00, 125.99it/s]Loading weights:  75%|███████▍  | 298/399 [00:02<00:00, 123.22it/s]Loading weights:  74%|███████▍  | 297/399 [00:02<00:00, 120.77it/s]Loading weights:  69%|██████▉   | 276/399 [00:02<00:00, 131.38it/s]Loading weights:  75%|███████▌  | 301/399 [00:02<00:00, 121.37it/s]Loading weights:  75%|███████▌  | 301/399 [00:02<00:00, 121.36it/s]Loading weights:  71%|███████   | 282/399 [00:02<00:00, 120.98it/s]Loading weights:  77%|███████▋  | 307/399 [00:02<00:00, 125.59it/s]Loading weights:  78%|███████▊  | 312/399 [00:03<00:00, 133.98it/s]Loading weights:  73%|███████▎  | 290/399 [00:02<00:00, 129.14it/s]Loading weights:  78%|███████▊  | 312/399 [00:03<00:00, 121.32it/s]Loading weights:  78%|███████▊  | 311/399 [00:02<00:00, 117.64it/s]Loading weights:  79%|███████▊  | 314/399 [00:03<00:00, 116.88it/s]Loading weights:  79%|███████▊  | 314/399 [00:03<00:00, 116.88it/s]Loading weights:  75%|███████▍  | 298/399 [00:03<00:00, 129.54it/s]Loading weights:  81%|████████  | 323/399 [00:03<00:00, 133.35it/s]Loading weights:  82%|████████▏ | 326/399 [00:03<00:00, 130.12it/s]Loading weights:  81%|████████  | 324/399 [00:03<00:00, 118.52it/s]Loading weights:  76%|███████▌  | 304/399 [00:03<00:00, 124.13it/s]Loading weights:  81%|████████▏ | 325/399 [00:03<00:00, 114.18it/s]Loading weights:  83%|████████▎ | 330/399 [00:03<00:00, 126.64it/s]Loading weights:  83%|████████▎ | 331/399 [00:03<00:00, 129.26it/s]Loading weights:  78%|███████▊  | 312/399 [00:03<00:00, 132.31it/s]Loading weights:  84%|████████▍ | 337/399 [00:03<00:00, 128.48it/s]Loading weights:  86%|████████▌ | 342/399 [00:03<00:00, 137.60it/s]Loading weights:  84%|████████▍ | 336/399 [00:03<00:00, 116.31it/s]Loading weights:  80%|████████  | 320/399 [00:03<00:00, 132.71it/s]Loading weights:  85%|████████▌ | 341/399 [00:03<00:00, 125.04it/s]Loading weights:  86%|████████▋ | 345/399 [00:03<00:00, 128.38it/s]Loading weights:  86%|████████▋ | 345/399 [00:03<00:00, 129.16it/s]Loading weights:  82%|████████▏ | 326/399 [00:03<00:00, 123.95it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 140.34it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 134.06it/s]Loading weights:  88%|████████▊ | 351/399 [00:03<00:00, 124.88it/s]Loading weights:  84%|████████▎ | 334/399 [00:03<00:00, 131.00it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 125.79it/s]Loading weights:  90%|████████▉ | 359/399 [00:03<00:00, 122.02it/s]Loading weights:  90%|████████▉ | 358/399 [00:03<00:00, 116.08it/s]Loading weights:  86%|████████▌ | 342/399 [00:03<00:00, 132.58it/s]Loading weights:  93%|█████████▎| 370/399 [00:03<00:00, 126.02it/s]Loading weights:  93%|█████████▎| 371/399 [00:03<00:00, 131.74it/s]Loading weights:  92%|█████████▏| 367/399 [00:03<00:00, 127.72it/s]Loading weights:  87%|████████▋ | 348/399 [00:03<00:00, 125.87it/s]Loading weights:  92%|█████████▏| 369/399 [00:03<00:00, 116.64it/s]Loading weights:  95%|█████████▍| 378/399 [00:03<00:00, 135.64it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 134.37it/s]Loading weights:  95%|█████████▍| 378/399 [00:03<00:00, 129.13it/s]Loading weights:  96%|█████████▌| 384/399 [00:03<00:00, 128.61it/s]Loading weights:  96%|█████████▋| 385/399 [00:03<00:00, 132.46it/s]Loading weights:  95%|█████████▌| 380/399 [00:03<00:00, 122.65it/s]Loading weights:  91%|█████████ | 364/399 [00:03<00:00, 127.93it/s]Loading weights:  97%|█████████▋| 386/399 [00:03<00:00, 130.13it/s]Loading weights:  98%|█████████▊| 392/399 [00:03<00:00, 129.53it/s]Loading weights:  98%|█████████▊| 392/399 [00:03<00:00, 122.86it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 108.68it/s]
+Loading weights: 100%|██████████| 399/399 [00:03<00:00, 109.16it/s]
+Loading weights:  99%|█████████▉| 397/399 [00:03<00:00, 127.81it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 109.90it/s]
+Loading weights: 100%|██████████| 399/399 [00:03<00:00, 108.59it/s]
+Loading weights:  93%|█████████▎| 370/399 [00:03<00:00, 117.42it/s]Loading weights:  99%|█████████▉| 395/399 [00:03<00:00, 130.12it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 108.00it/s]
+Loading weights: 100%|██████████| 399/399 [00:03<00:00, 109.08it/s]
+Loading weights:  95%|█████████▍| 378/399 [00:03<00:00, 127.44it/s]Loading weights:  97%|█████████▋| 389/399 [00:03<00:00, 130.76it/s]Loading weights:  98%|█████████▊| 391/399 [00:03<00:00, 119.65it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 104.45it/s]
+Loading weights: 100%|██████████| 399/399 [00:03<00:00, 104.42it/s]
+Embedding mean: 1.508e-05, std: 2.209e-02
+Loaded Musique dataset keys: dict_keys(['id', 'paragraphs', 'question', 'question_decomposition', 'answer', 'answer_aliases', 'answerable'])
+Loaded Musique dataset keys: dict_keys(['id', 'paragraphs', 'question', 'question_decomposition', 'answer', 'answer_aliases', 'answerable'])
+Loaded Musique dataset keys: dict_keys(['id', 'paragraphs', 'question', 'question_decomposition', 'answer', 'answer_aliases', 'answerable'])
+Loaded Musique dataset keys: dict_keys(['id', 'paragraphs', 'question', 'question_decomposition', 'answer', 'answer_aliases', 'answerable'])
+Loaded Musique dataset keys: dict_keys(['id', 'paragraphs', 'question', 'question_decomposition', 'answer', 'answer_aliases', 'answerable'])
+Loaded Musique dataset keys: dict_keys(['id', 'paragraphs', 'question', 'question_decomposition', 'answer', 'answer_aliases', 'answerable'])
+Loaded Musique dataset keys: dict_keys(['id', 'paragraphs', 'question', 'question_decomposition', 'answer', 'answer_aliases', 'answerable'])
+Loaded Musique dataset keys: dict_keys(['id', 'paragraphs', 'question', 'question_decomposition', 'answer', 'answer_aliases', 'answerable'])
+Total training samples: 10048
+**************************************************
+Training input length statistics (tokens):
+  full input per sample: mean=2380.81, median=2326, p90=3093, p95=3337, min=927, max=7083
+--------------------------------------------------
+  all documents per sample: mean=2277.88, median=2224, p90=2986, p95=3228, min=831, max=6980
+--------------------------------------------------
+  individual document: mean=113.91, median=98, p90=200, p95=242, min=21, max=1432
+--------------------------------------------------
+  document count per sample: mean=20.00, median=20, p90=20, p95=20, min=16, max=20
+--------------------------------------------------
+  KVPacket context per sample: mean=2704.34, median=2649, p90=3417, p95=3659, min=1252, max=7404
+**************************************************
+Loaded generation cache from ./generation_cache/qwen_3_8b/musique/8_8_10048samples_1536maxtokens.disk.pt, size: 10048
+[Timing] Teacher cache load: 0.731 s (00:00:01)
+Teacher targets: 10048 cached, 0 to generate.
+[Timing] Teacher logits precompute (0 samples): 0.232 s (00:00:00)
+Epoch 1/60
+Training |⚠︎                                       | (!) 0/1256 [0%] in 3.8s (0.00/s) 
+Training |⚠︎                                       | (!) 0/1256 [0%] in 8.4s (0.00/s) 
+Training |▏⚠︎                                      | (!) 4/1256 [0%] in 8.1s (0.49/s) 
+Training |⚠︎                                       | (!) 0/1256 [0%] in 8.5s (0.00/s) 
+Training |⚠︎                                       | (!) 0/1256 [0%] in 8.8s (0.00/s) 
+[rank4]: Traceback (most recent call last):
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/run_train_filler.py", line 1165, in <module>
+[rank4]:     train_one_config(
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/run_train_filler.py", line 1046, in train_one_config
+[rank4]:     train_wrapper_4d_batch(
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/run_train_filler.py", line 321, in train_wrapper_4d_batch
+[rank4]:     outputs = model(
+[rank4]:               ^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+[rank4]:     return self._call_impl(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+[rank4]:     return forward_call(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/utils/generic.py", line 843, in wrapper
+[rank4]:     output = func(self, *args, **kwargs)
+[rank4]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 506, in forward
+[rank4]:     outputs: BaseModelOutputWithPast = self.model(
+[rank4]:                                        ^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+[rank4]:     return self._call_impl(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+[rank4]:     return forward_call(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/utils/generic.py", line 917, in wrapper
+[rank4]:     output = func(self, *args, **kwargs)
+[rank4]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 253, in wrapper
+[rank4]:     outputs = func(self, *args, **kwargs)
+[rank4]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 436, in forward
+[rank4]:     hidden_states = decoder_layer(
+[rank4]:                     ^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/modeling_layers.py", line 93, in __call__
+[rank4]:     return super().__call__(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+[rank4]:     return self._call_impl(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+[rank4]:     return forward_call(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 338, in forward
+[rank4]:     hidden_states = self.mlp(hidden_states)
+[rank4]:                     ^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+[rank4]:     return self._call_impl(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+[rank4]:     return forward_call(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 82, in forward
+[rank4]:     down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+[rank4]:                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+[rank4]:     return self._call_impl(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+[rank4]:     return forward_call(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/transformers/activations.py", line 103, in forward
+[rank4]:     return nn.functional.silu(input)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/nn/functional.py", line 2395, in silu
+[rank4]:     return torch._C._nn.silu(input)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 434.00 MiB. GPU 4 has a total capacity of 139.80 GiB of which 31.06 MiB is free. Including non-PyTorch memory, this process has 139.76 GiB memory in use. Of the allocated memory 129.20 GiB is allocated by PyTorch, and 8.96 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+W0622 18:04:04.233000 4424 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 4518 closing signal SIGTERM
+W0622 18:04:04.236000 4424 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 4519 closing signal SIGTERM
+W0622 18:04:04.238000 4424 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 4520 closing signal SIGTERM
+W0622 18:04:04.241000 4424 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 4521 closing signal SIGTERM
+W0622 18:04:04.243000 4424 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 4523 closing signal SIGTERM
+W0622 18:04:04.248000 4424 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 4524 closing signal SIGTERM
+W0622 18:04:04.248000 4424 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 4525 closing signal SIGTERM
+E0622 18:04:05.832000 4424 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:984] failed (exitcode: 1) local_rank: 4 (pid: 4522) of binary: /data/ldeng/code/kvbridge/KVPacket/.venv/bin/python3
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/run.py", line 995, in <module>
+    main()
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/run.py", line 991, in main
+    run(args)
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/run.py", line 982, in run
+    elastic_launch(
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 170, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 317, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+run_train_filler.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-06-22_18:04:05
+  host      : dedicated-developjob-kvbridge-hjutb-5667dff576-4ssln
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 4518)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 4518
+[2]:
+  time      : 2026-06-22_18:04:05
+  host      : dedicated-developjob-kvbridge-hjutb-5667dff576-4ssln
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 4519)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 4519
+[3]:
+  time      : 2026-06-22_18:04:05
+  host      : dedicated-developjob-kvbridge-hjutb-5667dff576-4ssln
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 4520)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 4520
+[4]:
+  time      : 2026-06-22_18:04:05
+  host      : dedicated-developjob-kvbridge-hjutb-5667dff576-4ssln
+  rank      : 3 (local_rank: 3)
+  exitcode  : -15 (pid: 4521)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 4521
+[5]:
+  time      : 2026-06-22_18:04:05
+  host      : dedicated-developjob-kvbridge-hjutb-5667dff576-4ssln
+  rank      : 5 (local_rank: 5)
+  exitcode  : -15 (pid: 4523)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 4523
+[6]:
+  time      : 2026-06-22_18:04:05
+  host      : dedicated-developjob-kvbridge-hjutb-5667dff576-4ssln
+  rank      : 6 (local_rank: 6)
+  exitcode  : -15 (pid: 4524)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 4524
+[7]:
+  time      : 2026-06-22_18:04:05
+  host      : dedicated-developjob-kvbridge-hjutb-5667dff576-4ssln
+  rank      : 7 (local_rank: 7)
+  exitcode  : -15 (pid: 4525)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 4525
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-06-22_18:04:04
+  host      : dedicated-developjob-kvbridge-hjutb-5667dff576-4ssln
+  rank      : 4 (local_rank: 4)
+  exitcode  : 1 (pid: 4522)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

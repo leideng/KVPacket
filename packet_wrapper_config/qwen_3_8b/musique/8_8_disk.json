@@ -1,8 +1,8 @@
 {
-    "total_epoch": 30,
+    "total_epoch": 60,
     "batch_size": 64,
     "gen_batch_size": 2,
-    "forward_batch_size": 1,
+    "forward_batch_size": 4,
     "header_len": 8,
     "trailer_len": 8,
     "use_logits": true,
@@ -12,21 +12,21 @@
         "dtype": "bfloat16",
         "device": "cuda:0",
         "generation_kwargs": {
-            "max_new_tokens": 768,
+            "max_new_tokens": 1536,
             "stop_strings": ["<|im_end|>"],
             "do_sample": false,
             "use_cache": true
         }
     },
     "cache_device": "disk",
-    "cache_path": "./generation_cache/qwen_3_8b/musique/8_8_64samples_768maxtokens.disk.pt",
+    "cache_path": "./generation_cache/qwen_3_8b/musique/8_8_10048samples_1536maxtokens.disk.pt",
     "generation_cache_save_interval": 8,
     "seed": 42,
     "ckpt_epoch": 2,
-    "save_path": "./packet_wrapper/qwen_3_8b/musique/num_samples_64_max_tokens_768_lr5e-4_disk/",
+    "save_path": "./packet_wrapper/qwen_3_8b/musique/num_samples_10048_max_tokens_1536_lr1e-5_disk/",
     "file_name": "8_8_disk.pt",
     "opt_config": {
-        "lr": 5e-4,
+        "lr": 1e-5,
         "weight_decay": 0.0
     },
     "scheduler_config":{
@@ -36,7 +36,7 @@
     "data_configs": [
         {
             "dataset_name": "musique",
-            "num_samples": 64,
+            "num_samples": 10048,
             "num_data_strs": 0,
             "num_shots": 0,
             "subset": "default",
