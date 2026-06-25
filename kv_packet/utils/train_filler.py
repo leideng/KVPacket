@@ -286,6 +286,17 @@ def batched_packet_4d_mask(
     padding_side: str = 'left',
     device: torch.device = torch.device("cpu"),
 ) -> torch.Tensor:
+    """
+    Stack per-sample packet 4D masks into one batch tensor, padding to max seq_len.
+
+    Returns shape (batch_size, 1, max_seq_len, max_seq_len). With default left padding,
+    each sample's mask sits in the bottom-right (aligned with left-padded embeddings).
+
+    Example:
+        batch_input_chunk_sizes = [[3, 5], [3, 4, 3]]   
+        batch_query_len = [4, 4]
+        # → seq_lens 12 and 14; output (2, 1, 14, 14); row 0 mask at [-12:, -12:]
+    """
     mask_list: list[torch.Tensor] = [
         packet_4d_mask(
             input_chunk_sizes=input_chunk_sizes,
@@ -344,6 +355,18 @@ def batched_input_embed(
     max_seq_len = max(embed.size(1) for embed in input_embed_list)
     batch_size = len(input_embed_list)
 
+    # could result in OOM if max_seq_len is too large; 
+    # (NOTE) try to reduce forward_batch_size and eventually to be 1 if OOM
+    # padded_masks: (batch_size, 1, max_seq_len, max_seq_len), dtype=bool (1 byte/elem)
+    # | max_seq_len | batch=1 | batch=8 | batch=16 |
+    # |-------------|---------|---------|----------|
+    # | 4K          | 16 MiB  | 128 MiB | 256 MiB  |
+    # | 8K          | 64 MiB  | 512 MiB | 1 GiB    |
+    # | 16K         | 256 MiB | 2 GiB   | 4 GiB    |
+    # | 32K         | 1 GiB   | 8 GiB   | 16 GiB   |
+    # | 64K         | 4 GiB   | 32 GiB  | 64 GiB   |
+    # | 128K        | 16 GiB  | 128 GiB | 256 GiB  |
+    
     padded_embeds = torch.zeros(
         (batch_size, max_seq_len, input_embed_list[0].size(2)),
         dtype=input_embed_list[0].dtype,
@@ -377,6 +400,30 @@ def prepare_sample_input(
     packet_wrapper: PacketWrapper,
     device: torch.device,
 ) -> tuple[torch.Tensor, list[int], int, int]:
+    """Build one training forward pass as concatenated input embeddings.
+
+    Layout: [preamble?][wrapped doc_1]...[wrapped doc_n][task_prompt + gen[:-1]].
+    Documents are wrapped with ``packet_wrapper``; the query tail uses teacher forcing
+    from ``generation_cache`` (precomputed on preamble+docs+task_prompt).
+
+    (NOTE1) the last generated token 'z' is only a target, 
+    not an extra input step for predicting next token. Thus the input is gen_seq[:-1].
+
+    (NOTE2) Documents are the only chunks that get packet headers/trailers; 
+    preamble and query stay unwrapped.
+
+    Toy example (token counts; header_len=1, trailer_len=1):
+        preamble="sys" (1) | doc="ab" (2) -> wrap -> 1+2+1=4 | task="Q:" (2)
+        gen_seq=[x,y,z] (3) -> query_ids = "Q:" + [x,y] -> query_len=4 
+        Returns: input_embed [1, 1+4+4, dim], chunk_sizes=[1, 4], query_len=4, gen_seq_len=3
+
+    Returns:
+        input_embed: [1, total_len, hidden_dim]
+        input_chunk_sizes: per-chunk lengths for preamble and each document only; query is not included
+        query_len: tokens in the final (unwrapped) query+prefix segment
+        gen_seq_len: length of the cached generation (loss targets)
+    """
+    
     sample_str = sample_to_str(sample)
     generation = generation_cache.get(sample_str)
     assert generation is not None
