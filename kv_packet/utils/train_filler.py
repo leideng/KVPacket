@@ -77,6 +77,10 @@ class TrainConfig(TypedDict):
     cache_device: str
     cache_path: str|None
     generation_cache_save_interval: int
+    # [Parallel teacher-cache change]
+    # 是否启用多 rank 并行预埋 teacher logits。
+    # 只有在 torchrun/DDP 启动且 cache_device="disk" 时才实际生效。
+    parallel_teacher_cache: bool
     seed: int
     save_path: str
     file_name: str
@@ -181,6 +185,12 @@ def load_train_config(config: dict) -> TrainConfig:
         cache_device=cache_device,
         cache_path=config.get("cache_path", None),
         generation_cache_save_interval=config.get("generation_cache_save_interval", 0),
+        # [Parallel teacher-cache change]
+        # 是否允许所有 DDP rank 分担 teacher generation。
+        parallel_teacher_cache=config.get(
+            "parallel_teacher_cache",
+            False,
+        ),
         seed=seed,
         save_path=config["save_path"],
         file_name=config["file_name"],
@@ -276,17 +286,6 @@ def batched_packet_4d_mask(
     padding_side: str = 'left',
     device: torch.device = torch.device("cpu"),
 ) -> torch.Tensor:
-    """
-    Stack per-sample packet 4D masks into one batch tensor, padding to max seq_len.
-
-    Returns shape (batch_size, 1, max_seq_len, max_seq_len). With default left padding,
-    each sample's mask sits in the bottom-right (aligned with left-padded embeddings).
-
-    Example:
-        batch_input_chunk_sizes = [[3, 5], [3, 4, 3]]   
-        batch_query_len = [4, 4]
-        # → seq_lens 12 and 14; output (2, 1, 14, 14); row 0 mask at [-12:, -12:]
-    """
     mask_list: list[torch.Tensor] = [
         packet_4d_mask(
             input_chunk_sizes=input_chunk_sizes,
@@ -301,28 +300,6 @@ def batched_packet_4d_mask(
 
     max_seq_len = max(mask.size(-1) for mask in mask_list)
     batch_size = len(mask_list)
-
-    # could result in OOM if max_seq_len is too large; 
-    # (NOTE) try to reduce forward_batch_size and eventually to be 1 if OOM
-    # padded_masks: (batch_size, 1, max_seq_len, max_seq_len), dtype=bool (1 byte/elem)
-    # | max_seq_len | batch=1 | batch=8 | batch=16 |
-    # |-------------|---------|---------|----------|
-    # | 4K          | 16 MiB  | 128 MiB | 256 MiB  |
-    # | 8K          | 64 MiB  | 512 MiB | 1 GiB    |
-    # | 16K         | 256 MiB | 2 GiB   | 4 GiB    |
-    # | 32K         | 1 GiB   | 8 GiB   | 16 GiB   |
-    # | 64K         | 4 GiB   | 32 GiB  | 64 GiB   |
-    # | 128K        | 16 GiB  | 128 GiB | 256 GiB  |
-    
-    need_bytes = batch_size * max_seq_len * max_seq_len  # torch.bool, 1 byte/elem
-    if device.type == "cuda":
-        free_bytes, _ = torch.cuda.mem_get_info(device)
-        if need_bytes > free_bytes:
-            raise RuntimeError(
-                f"padded_masks needs ~{need_bytes / 1024**3:.2f} GiB "
-                f"({batch_size=}, {max_seq_len=}), "
-                f"but only ~{free_bytes / 1024**3:.2f} GiB free on {device}."
-            )
 
     padded_masks = torch.zeros(
         (batch_size, 1, max_seq_len, max_seq_len),
@@ -400,29 +377,6 @@ def prepare_sample_input(
     packet_wrapper: PacketWrapper,
     device: torch.device,
 ) -> tuple[torch.Tensor, list[int], int, int]:
-    """Build one training forward pass as concatenated input embeddings.
-
-    Layout: [preamble?][wrapped doc_1]...[wrapped doc_n][task_prompt + gen[:-1]].
-    Documents are wrapped with ``packet_wrapper``; the query tail uses teacher forcing
-    from ``generation_cache`` (precomputed on preamble+docs+task_prompt).
-
-    (NOTE1) the last generated token 'z' is only a target, 
-    not an extra input step for predicting next token. Thus the input is gen_seq[:-1].
-
-    (NOTE2) Documents are the only chunks that get packet headers/trailers; 
-    preamble and query stay unwrapped.
-
-    Toy example (token counts; header_len=1, trailer_len=1):
-        preamble="sys" (1) | doc="ab" (2) -> wrap -> 1+2+1=4 | task="Q:" (2)
-        gen_seq=[x,y,z] (3) -> query_ids = "Q:" + [x,y] -> query_len=4 
-        Returns: input_embed [1, 1+4+4, dim], chunk_sizes=[1, 4], query_len=4, gen_seq_len=3
-
-    Returns:
-        input_embed: [1, total_len, hidden_dim]
-        input_chunk_sizes: per-chunk lengths for preamble and each document only; query is not included
-        query_len: tokens in the final (unwrapped) query+prefix segment
-        gen_seq_len: length of the cached generation (loss targets)
-    """
     sample_str = sample_to_str(sample)
     generation = generation_cache.get(sample_str)
     assert generation is not None
@@ -441,8 +395,7 @@ def prepare_sample_input(
         assert isinstance(context_ids, torch.Tensor)
 
         input_chunk_sizes.append(context_ids.size(1))
-        with torch.no_grad():
-            context_embed = model.model.embed_tokens(context_ids.to(device))
+        context_embed = model.model.embed_tokens(context_ids.to(device))
         input_embed_list.append(context_embed)
     
     for data_str in sample["documents"]:
@@ -454,8 +407,7 @@ def prepare_sample_input(
         data_ids = data_input["input_ids"]
         assert isinstance(data_ids, torch.Tensor)
 
-        with torch.no_grad():
-            data_embed = model.model.embed_tokens(data_ids.to(device))
+        data_embed = model.model.embed_tokens(data_ids.to(device))
         wrapped_data_embed = packet_wrapper.wrap(data_embed)
 
         input_chunk_sizes.append(wrapped_data_embed.size(1))
@@ -477,8 +429,7 @@ def prepare_sample_input(
     query_len = query_ids.size(1)
     gen_seq_len = gen_seq.size(0)
 
-    with torch.no_grad():
-        query_embed = model.model.embed_tokens(query_ids)
+    query_embed = model.model.embed_tokens(query_ids)
     input_embed_list.append(query_embed)
 
     input_embed = torch.cat(input_embed_list, dim=1)
@@ -510,18 +461,15 @@ def get_packed_logits(
 
     for sample in samples:
         sample_str = sample_to_str(sample)
-        generation = generation_cache.get(sample_str)
+        generation = generation_cache.get(sample_str) # cache_device="disk" 时，run_train_filler 会把 generation_cache.device 转成 cpu
         assert generation is not None
         assert len(generation["logits"]) == 1
         
         # TODO: modify device
         # gen_logits = generation["logits"][0].unsqueeze(0).to('cuda:0') # [1, gen_seq_len, vocab_size]
-        # gen_logits = generation["logits"][0].unsqueeze(0).to(device)
-        gen_logits = generation["logits"][0].unsqueeze(0) # for DDP training
+        gen_logits = generation["logits"][0].unsqueeze(0) # 取决于 generation 的 device
         packed_logits_list.append(gen_logits)
 
-    # Padding logits is similar to padding input embeddings
-    # Thus, we can reuse the same function to pad logits;
     batched_logits = batched_input_embed(
         input_embed_list=packed_logits_list,
         padding_side=padding_side
@@ -577,48 +525,49 @@ def get_packed_labels(
     return batched_labels
 
 
-# def build_generation_cache(
-#     samples: list[TrainSample],
-#     batch_size: int,
-#     model: SupportedModel,
-#     tokenizer: TokenizerType,
-#     generation_config: GenerationConfig|None = None,
-#     generation_cache: GenerationCache|None = None,
-#     store_logits: bool = True,
-# ) -> GenerationCache:
 def build_generation_cache(
-    samples: list[TrainSample],
-    batch_size: int,
-    model: SupportedModel,
+    samples: list[TrainSample], # 并行预埋时，每个 rank 传入自己的子集 rank_teacher_samples
+    batch_size: int, # teacher generation batch size/gen_batch_size
+    model: SupportedModel, # DDP 下每个 rank 都有一份位于本地 GPU 的模型
     tokenizer: TokenizerType,
     generation_config: GenerationConfig|None = None,
-    generation_cache: GenerationCache|None = None,
+    generation_cache: GenerationCache|None = None, # 待更新的缓存对象
     store_logits: bool = True,
-    cache_path: str|None = None,
-    save_interval: int = 0,
+    cache_path: str|None = None, 
+    save_interval: int = 0,  # 每多少 generation batch 保存一次轻量索引
+    # [Parallel teacher-cache change]
+    # 仅用于区分多 rank 日志，不改变缓存内容。
+    log_prefix: str = "",
 ) -> GenerationCache:
-    """Generate and cache model outputs. Idempotent: only missing samples are generated."""
+
+    # 如果调用时候没有传入缓存，就创建一个新的内存缓存
+    # disk 模式下通常由外部传入
     if generation_cache is None:
         generation_cache = GenerationCache()
     
-    # Determine which samples need generation
-    # only those that are not in the cache are generated
+    # 检查 cache key，找出未缓存样本
     samples_to_gen = [
         sample for sample in samples
         if sample_to_str(sample) not in generation_cache
     ]
 
+    # 没有确实样本就直接返回 generation_cache
+    # 比如，Teacher targets: 10048/? cached, 0 to generate. 就直接返回，不调用模型生成
     if len(samples_to_gen) == 0:
         return generation_cache
 
+    # 构造 teacher 输入字符串
     input_strs = [
         sample["preamble"] + " ".join(sample["documents"]) + 
         " " + sample["task_prompt"] for sample in samples_to_gen
     ]
 
+    # 处理特殊 batch size
+    # 如果调用方法传入非正值，就把全部确实样本都放到一个 batch
     if batch_size <= 0:
         batch_size = len(input_strs)
 
+    # 计算 batch 数，并创建进度条
     num_batches = (len(input_strs) + batch_size - 1) // batch_size
     batch_idx = 0
 
@@ -627,48 +576,51 @@ def build_generation_cache(
         title="Building generation cache",
         dual_line=True,
     ) as bar:
+        # 遍历 batch
         for i in range(0, len(input_strs), batch_size):
             batch_idx += 1
+            # 取当前 batch
             batch_input_strs = input_strs[i: i + batch_size]
 
-            # checkpoint for cache_device disk
+            # 记录 batch 开始时间
             batch_start = perf_counter()
             print(
-                "[TeacherCache] "
-                f"batch {batch_idx}/{num_batches} start, "
-                f"samples {i + 1}-{i + len(batch_input_strs)}/{len(input_strs)}, "
-                f"cached={len(generation_cache.cache)}, "
-                f"{_disk_cache_status(generation_cache)}, "
-                f"{_cgroup_memory_status()}",
+                f"{log_prefix}[TeacherCache] "
+                f"batch {batch_idx}/{num_batches} start, " # 当前 batch
+                f"samples {i + 1}-{i + len(batch_input_strs)}/{len(input_strs)}, " # 当前处理范围
+                f"cached={len(generation_cache.cache)}, " # 当前索引已有条数
+                f"{_disk_cache_status(generation_cache)}, " # shard 数量和磁盘占用
+                f"{_cgroup_memory_status()}", # 容器 CPU 内存占用
                 flush=True,
             )
 
+            # 更新进度条文本
             bar.text = (  # type: ignore[attr-defined]
                 f"Batch {batch_idx}/{num_batches} "
                 f"({i}/{len(input_strs)} samples)"
             )
             
-            # gen = get_generation(
-            #     model,
-            #     tokenizer,
-            #     input_strs=batch_input_strs,
-            #     generation_config=generation_config,
-            # )
+            # 记录生成开始时间
             generate_start = perf_counter()
+            # 调用 teacher generation
             gen = get_generation(
                 model,
                 tokenizer,
                 input_strs=batch_input_strs,
                 generation_config=generation_config,
                 output_logits=store_logits,
-            )
+            ) # 如果 store_logits=True，会返回每个生成位置的完整词表 logits
+            # 计算生成耗时
             generate_seconds = perf_counter() - generate_start
+            # 当前 batch 样本数
             gen_len = len(batch_input_strs)
             
+            # 表示完成一个 generation batch，更新进度条
             bar(1)
             
             add_start = perf_counter()
             for k in range(gen_len):
+                # 映射回原始确实样本位置
                 sample_index = i + k
                 sample_str = sample_to_str(samples_to_gen[sample_index])
                 generation_cache.add(sample_str, {
@@ -679,14 +631,20 @@ def build_generation_cache(
             add_seconds = perf_counter() - add_start
             
             save_seconds = 0.0
+            # 判断是否周期保存：
+            # 1. 有索引路径
+            # 2. 周期保存已经启用
+            # 3. 当前 batch 达到保存间隔
             if cache_path is not None and save_interval > 0 and batch_idx % save_interval == 0:
                 cache_dir = os.path.dirname(cache_path)
                 if cache_dir:
                     os.makedirs(cache_dir, exist_ok=True)
                 save_start = perf_counter()
+                # 保存轻量索引
                 torch.save(generation_cache.to_state_dict(), cache_path)
                 save_seconds = perf_counter() - save_start
 
+            # 删掉临时 generation
             del gen
             # [KVPacket disk-cache change] Drop transient teacher logits after caching/offload.
             gc.collect()
@@ -696,7 +654,7 @@ def build_generation_cache(
                 
             batch_seconds = perf_counter() - batch_start
             print(
-                "[TeacherCache] "
+                f"{log_prefix}[TeacherCache] "
                 f"batch {batch_idx}/{num_batches} done, "
                 f"generate={generate_seconds:.2f}s, "
                 f"cache_add={add_seconds:.2f}s, "
