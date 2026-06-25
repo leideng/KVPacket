@@ -1,0 +1,1 @@
+setsid env CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 uv run python -m torch.distributed.run --standalone --nproc_per_node=8 run_train_filler_with_parallel.py packet_wrapper_config/qwen_3_8b/2wikimqa/8_8_parallel.json > dev/2wikimqa/training.parallel-teacher.1024samples.ddp8.txt 2>&1 < /dev/null &

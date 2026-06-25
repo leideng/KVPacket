@@ -1,0 +1,177 @@
+
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+*****************************************
+Loaded 1 training configurations.
+Distributed training enabled: rank=0, world_size=8, local_rank=0
+ - packet_wrapper_config/qwen_3_8b/2wikimqa/8_8_parallel.json
+Training configuration:
+{
+│   'total_epoch': 60,
+│   'gen_batch_size': 4,
+│   'batch_size': 64,
+│   'forward_batch_size': 1,
+│   'header_len': 8,
+│   'trailer_len': 8,
+│   'dtype': 'float32',
+│   'use_logits': True,
+│   'use_cache': False,
+│   'model': {
+│   │   'model_path': '/public/models/Qwen3-8B',
+│   │   'dtype': 'bfloat16',
+│   │   'device': 'cuda:0',
+│   │   'generation_kwargs': {
+│   │   │   'max_new_tokens': 1024,
+│   │   │   'stop_strings': ['<|im_end|>'],
+│   │   │   'do_sample': False,
+│   │   │   'use_cache': True
+│   │   }
+│   },
+│   'cache_device': 'disk',
+│   'cache_path': './generation_cache/qwen_3_8b/2wikimultihopqa/8_8_1024samples_1024maxtokens.disk.pt',
+│   'generation_cache_save_interval': 8,
+│   'parallel_teacher_cache': True,
+│   'seed': 42,
+│   'save_path': './packet_wrapper/qwen_3_8b/2wikimultihopqa/num_samples_1024_max_tokens_1024_lr5e-4_disk/',
+│   'file_name': '8_8.pt',
+│   'ckpt_epoch': 2,
+│   'opt_config': {'lr': 0.0005, 'weight_decay': 0.0},
+│   'scheduler_config': {'start_factor': 1.0, 'end_factor': 0.0},
+│   'data_configs': [
+│   │   {
+│   │   │   'dataset_name': '2wikimultihopqa',
+│   │   │   'num_data_strs': 0,
+│   │   │   'num_shots': 0,
+│   │   │   'num_samples': 1024,
+│   │   │   'subset': 'default',
+│   │   │   'split': 'train',
+│   │   │   'seed': 0,
+│   │   │   'data_kwargs': {'add_inst': True, 'add_cot': True},
+│   │   │   'template': 'qwen_3_chat',
+│   │   │   'template_kwargs': {}
+│   │   }
+│   ],
+│   'resume': False,
+│   'resume_epoch': None
+}
+Model device: cuda:0; current CUDA device: 0; distributed=True, world_size=8
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<02:00,  3.31it/s]Loading weights:   0%|          | 1/399 [00:00<02:00,  3.31it/s]Loading weights:   0%|          | 1/399 [00:00<01:58,  3.35it/s]Loading weights:   0%|          | 1/399 [00:00<02:00,  3.31it/s]Loading weights:   0%|          | 1/399 [00:00<02:00,  3.31it/s]Loading weights:   0%|          | 1/399 [00:00<01:51,  3.58it/s]Loading weights:   0%|          | 1/399 [00:00<01:55,  3.46it/s]Loading weights:   0%|          | 1/399 [00:00<02:47,  2.37it/s]Loading weights:   1%|          | 2/399 [00:00<02:02,  3.24it/s]Loading weights:   1%|          | 2/399 [00:00<02:02,  3.24it/s]Loading weights:   1%|          | 2/399 [00:00<02:02,  3.25it/s]Loading weights:   1%|          | 2/399 [00:00<02:02,  3.24it/s]Loading weights:   1%|          | 2/399 [00:00<01:58,  3.34it/s]Loading weights:   1%|          | 2/399 [00:00<02:00,  3.29it/s]Loading weights:   1%|          | 2/399 [00:00<02:02,  3.24it/s]Loading weights:   4%|▍         | 16/399 [00:00<00:09, 38.99it/s]Loading weights:   8%|▊         | 33/399 [00:00<00:05, 72.90it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:13, 29.53it/s]Loading weights:   4%|▍         | 17/399 [00:00<00:11, 33.49it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:13, 28.94it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:12, 29.61it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:13, 29.31it/s]Loading weights:   4%|▍         | 15/399 [00:00<00:13, 29.03it/s]Loading weights:   4%|▎         | 14/399 [00:00<00:14, 26.90it/s]Loading weights:  12%|█▏        | 49/399 [00:00<00:03, 94.66it/s]Loading weights:   7%|▋         | 26/399 [00:00<00:07, 47.67it/s]Loading weights:   7%|▋         | 28/399 [00:00<00:07, 50.50it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:07, 47.56it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:07, 47.45it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:07, 48.10it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:07, 47.90it/s]Loading weights:   9%|▉         | 37/399 [00:00<00:05, 66.81it/s]Loading weights:  17%|█▋        | 67/399 [00:00<00:02, 117.34it/s]Loading weights:  11%|█         | 42/399 [00:00<00:04, 74.96it/s]Loading weights:  12%|█▏        | 48/399 [00:00<00:04, 84.16it/s]Loading weights:  10%|▉         | 39/399 [00:00<00:05, 61.69it/s]Loading weights:  10%|▉         | 39/399 [00:00<00:05, 61.30it/s]Loading weights:  10%|▉         | 39/399 [00:00<00:05, 61.63it/s]Loading weights:  10%|▉         | 39/399 [00:00<00:05, 61.20it/s]Loading weights:  13%|█▎        | 50/399 [00:01<00:05, 69.55it/s]Loading weights:  13%|█▎        | 53/399 [00:01<00:04, 78.56it/s]Loading weights:  14%|█▍        | 56/399 [00:01<00:03, 86.13it/s]Loading weights:  14%|█▍        | 56/399 [00:01<00:03, 86.48it/s]Loading weights:  14%|█▍        | 56/399 [00:01<00:03, 86.57it/s]Loading weights:  14%|█▍        | 56/399 [00:01<00:03, 86.23it/s]Loading weights:  15%|█▌        | 60/399 [00:01<00:04, 80.02it/s]Loading weights:  21%|██        | 82/399 [00:01<00:03, 100.29it/s]Loading weights:  18%|█▊        | 70/399 [00:01<00:03, 94.64it/s]Loading weights:  16%|█▋        | 65/399 [00:01<00:03, 86.13it/s]Loading weights:  17%|█▋        | 68/399 [00:01<00:03, 94.67it/s]Loading weights:  17%|█▋        | 68/399 [00:01<00:03, 94.94it/s]Loading weights:  17%|█▋        | 68/399 [00:01<00:03, 94.84it/s]Loading weights:  18%|█▊        | 70/399 [00:01<00:03, 94.19it/s]Loading weights:  19%|█▉        | 76/399 [00:01<00:03, 97.19it/s]Loading weights:  25%|██▍       | 98/399 [00:01<00:02, 114.13it/s]Loading weights:  21%|██        | 82/399 [00:01<00:03, 96.49it/s]Loading weights:  20%|█▉        | 79/399 [00:01<00:03, 99.72it/s]Loading weights:  20%|██        | 81/399 [00:01<00:03, 101.42it/s]Loading weights:  20%|██        | 81/399 [00:01<00:03, 98.03it/s]Loading weights:  20%|██        | 81/399 [00:01<00:03, 97.84it/s]Loading weights:  21%|██        | 82/399 [00:01<00:03, 97.84it/s]Loading weights:  23%|██▎       | 92/399 [00:01<00:02, 111.05it/s]Loading weights:  29%|██▉       | 115/399 [00:01<00:02, 125.97it/s]Loading weights:  26%|██▌       | 103/399 [00:01<00:02, 120.33it/s]Loading weights:  23%|██▎       | 91/399 [00:01<00:03, 99.87it/s]Loading weights:  24%|██▎       | 94/399 [00:01<00:02, 104.69it/s]Loading weights:  25%|██▍       | 98/399 [00:01<00:02, 113.28it/s]Loading weights:  23%|██▎       | 93/399 [00:01<00:03, 98.36it/s]Loading weights:  23%|██▎       | 93/399 [00:01<00:03, 98.22it/s]Loading weights:  33%|███▎      | 131/399 [00:01<00:02, 133.33it/s]Loading weights:  26%|██▋       | 105/399 [00:01<00:02, 111.57it/s]Loading weights:  29%|██▉       | 117/399 [00:01<00:02, 120.44it/s]Loading weights:  26%|██▋       | 105/399 [00:01<00:02, 105.87it/s]Loading weights:  29%|██▊       | 114/399 [00:01<00:02, 126.44it/s]Loading weights:  29%|██▊       | 114/399 [00:01<00:02, 125.29it/s]Loading weights:  26%|██▋       | 105/399 [00:01<00:02, 100.66it/s]Loading weights:  26%|██▋       | 105/399 [00:01<00:02, 100.55it/s]Loading weights:  37%|███▋      | 146/399 [00:01<00:01, 136.05it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:02, 130.40it/s]Loading weights:  34%|███▍      | 136/399 [00:01<00:01, 133.96it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:02, 128.13it/s]Loading weights:  30%|███       | 121/399 [00:01<00:02, 116.46it/s]Loading weights:  40%|████      | 161/399 [00:01<00:01, 138.25it/s]Loading weights:  31%|███       | 122/399 [00:01<00:02, 116.64it/s]Loading weights:  32%|███▏      | 128/399 [00:01<00:02, 119.91it/s]Loading weights:  32%|███▏      | 128/399 [00:01<00:02, 119.49it/s]Loading weights:  35%|███▍      | 139/399 [00:01<00:02, 128.86it/s]Loading weights:  38%|███▊      | 151/399 [00:01<00:01, 133.32it/s]Loading weights:  35%|███▍      | 139/399 [00:01<00:02, 129.26it/s]Loading weights:  45%|████▌     | 180/399 [00:01<00:01, 151.81it/s]Loading weights:  34%|███▍      | 136/399 [00:01<00:02, 120.35it/s]Loading weights:  36%|███▌      | 144/399 [00:01<00:01, 128.28it/s]Loading weights:  36%|███▌      | 144/399 [00:01<00:01, 128.11it/s]Loading weights:  34%|███▍      | 136/399 [00:01<00:02, 114.40it/s]Loading weights:  40%|███▉      | 158/399 [00:01<00:01, 141.23it/s]Loading weights:  42%|████▏     | 169/399 [00:01<00:01, 141.30it/s]Loading weights:  40%|███▉      | 158/399 [00:01<00:01, 141.97it/s]Loading weights:  49%|████▉     | 196/399 [00:01<00:01, 150.84it/s]Loading weights:  40%|███▉      | 158/399 [00:01<00:01, 126.59it/s]Loading weights:  40%|███▉      | 158/399 [00:01<00:01, 126.44it/s]Loading weights:  37%|███▋      | 149/399 [00:01<00:02, 112.43it/s]Loading weights:  37%|███▋      | 149/399 [00:01<00:02, 114.19it/s]Loading weights:  43%|████▎     | 173/399 [00:01<00:01, 137.77it/s]Loading weights:  46%|████▌     | 184/399 [00:01<00:01, 136.91it/s]Loading weights:  53%|█████▎    | 213/399 [00:01<00:01, 155.61it/s]Loading weights:  43%|████▎     | 173/399 [00:01<00:01, 137.08it/s]Loading weights:  41%|████      | 164/399 [00:01<00:01, 123.37it/s]Loading weights:  41%|████      | 164/399 [00:01<00:01, 121.91it/s]Loading weights:  43%|████▎     | 171/399 [00:02<00:01, 119.49it/s]Loading weights:  43%|████▎     | 171/399 [00:02<00:01, 118.50it/s]Loading weights:  48%|████▊     | 191/399 [00:02<00:01, 143.90it/s]Loading weights:  57%|█████▋    | 229/399 [00:01<00:01, 154.07it/s]Loading weights:  51%|█████     | 202/399 [00:02<00:01, 142.98it/s]Loading weights:  48%|████▊     | 191/399 [00:02<00:01, 143.88it/s]Loading weights:  45%|████▌     | 180/399 [00:02<00:01, 127.87it/s]Loading weights:  45%|████▌     | 180/399 [00:02<00:01, 126.86it/s]Loading weights:  48%|████▊     | 191/399 [00:02<00:01, 136.54it/s]Loading weights:  48%|████▊     | 191/399 [00:02<00:01, 135.97it/s]Loading weights:  52%|█████▏    | 206/399 [00:02<00:01, 138.60it/s]Loading weights:  62%|██████▏   | 246/399 [00:02<00:00, 157.25it/s]Loading weights:  54%|█████▍    | 217/399 [00:02<00:01, 137.86it/s]Loading weights:  52%|█████▏    | 206/399 [00:02<00:01, 139.89it/s]Loading weights:  51%|█████▏    | 205/399 [00:02<00:01, 132.30it/s]Loading weights:  51%|█████▏    | 205/399 [00:02<00:01, 131.35it/s]Loading weights:  49%|████▊     | 194/399 [00:02<00:01, 119.89it/s]Loading weights:  48%|████▊     | 193/399 [00:02<00:01, 116.74it/s]Loading weights:  56%|█████▌    | 224/399 [00:02<00:01, 144.12it/s]Loading weights:  66%|██████▌   | 262/399 [00:02<00:00, 154.48it/s]Loading weights:  56%|█████▌    | 222/399 [00:02<00:01, 144.86it/s]Loading weights:  59%|█████▉    | 235/399 [00:02<00:01, 142.49it/s]Loading weights:  55%|█████▌    | 221/399 [00:02<00:01, 137.88it/s]Loading weights:  56%|█████▌    | 224/399 [00:02<00:01, 143.67it/s]Loading weights:  53%|█████▎    | 211/399 [00:02<00:01, 132.98it/s]Loading weights:  53%|█████▎    | 211/399 [00:02<00:01, 133.24it/s]Loading weights:  60%|█████▉    | 239/399 [00:02<00:01, 140.33it/s]Loading weights:  70%|██████▉   | 278/399 [00:02<00:00, 151.12it/s]Loading weights:  63%|██████▎   | 250/399 [00:02<00:01, 138.10it/s]Loading weights:  59%|█████▉    | 237/399 [00:02<00:01, 132.43it/s]Loading weights:  59%|█████▉    | 236/399 [00:02<00:01, 134.67it/s]Loading weights:  60%|█████▉    | 239/399 [00:02<00:01, 139.78it/s]Loading weights:  56%|█████▋    | 225/399 [00:02<00:01, 125.91it/s]Loading weights:  56%|█████▋    | 225/399 [00:02<00:01, 125.39it/s]Loading weights:  64%|██████▍   | 257/399 [00:02<00:00, 145.52it/s]Loading weights:  67%|██████▋   | 266/399 [00:02<00:00, 143.54it/s]Loading weights:  64%|██████▍   | 257/399 [00:02<00:00, 144.90it/s]Loading weights:  63%|██████▎   | 252/399 [00:02<00:01, 139.35it/s]Loading weights:  74%|███████▎  | 294/399 [00:02<00:00, 127.51it/s]Loading weights:  64%|██████▍   | 257/399 [00:02<00:00, 145.76it/s]Loading weights:  68%|██████▊   | 272/399 [00:02<00:00, 141.94it/s]Loading weights:  60%|█████▉    | 238/399 [00:02<00:01, 120.98it/s]Loading weights:  60%|█████▉    | 238/399 [00:02<00:01, 120.90it/s]Loading weights:  68%|██████▊   | 272/399 [00:02<00:00, 140.71it/s]Loading weights:  67%|██████▋   | 268/399 [00:02<00:00, 143.38it/s]Loading weights:  77%|███████▋  | 308/399 [00:02<00:00, 129.50it/s]Loading weights:  70%|███████   | 281/399 [00:02<00:00, 127.29it/s]Loading weights:  68%|██████▊   | 272/399 [00:02<00:00, 141.42it/s]Loading weights:  72%|███████▏  | 287/399 [00:02<00:00, 141.44it/s]Loading weights:  64%|██████▎   | 254/399 [00:02<00:01, 129.46it/s]Loading weights:  64%|██████▎   | 254/399 [00:02<00:01, 129.43it/s]Loading weights:  81%|████████  | 322/399 [00:02<00:00, 132.01it/s]Loading weights:  73%|███████▎  | 290/399 [00:02<00:00, 147.85it/s]Loading weights:  71%|███████   | 283/399 [00:02<00:00, 139.74it/s]Loading weights:  75%|███████▍  | 299/399 [00:02<00:00, 140.33it/s]Loading weights:  73%|███████▎  | 290/399 [00:02<00:00, 148.54it/s]Loading weights:  67%|██████▋   | 268/399 [00:02<00:01, 127.65it/s]Loading weights:  67%|██████▋   | 268/399 [00:02<00:01, 127.63it/s]Loading weights:  76%|███████▌  | 302/399 [00:02<00:00, 132.68it/s]Loading weights:  76%|███████▋  | 305/399 [00:02<00:00, 143.04it/s]Loading weights:  75%|███████▌  | 301/399 [00:02<00:00, 148.42it/s]Loading weights:  76%|███████▋  | 305/399 [00:02<00:00, 145.08it/s]Loading weights:  84%|████████▍ | 336/399 [00:02<00:00, 111.86it/s]Loading weights:  79%|███████▊  | 314/399 [00:02<00:00, 122.43it/s]Loading weights:  79%|███████▉  | 316/399 [00:02<00:00, 129.45it/s]Loading weights:  70%|███████   | 281/399 [00:02<00:01, 116.96it/s]Loading weights:  70%|███████   | 281/399 [00:02<00:01, 116.90it/s]Loading weights:  81%|████████  | 323/399 [00:02<00:00, 152.73it/s]Loading weights:  79%|███████▉  | 316/399 [00:02<00:00, 143.30it/s]Loading weights:  81%|████████  | 323/399 [00:03<00:00, 152.64it/s]Loading weights:  88%|████████▊ | 350/399 [00:02<00:00, 118.55it/s]Loading weights:  82%|████████▏ | 329/399 [00:03<00:00, 127.32it/s]Loading weights:  83%|████████▎ | 330/399 [00:03<00:00, 130.08it/s]Loading weights:  75%|███████▍  | 298/399 [00:03<00:00, 130.18it/s]Loading weights:  74%|███████▍  | 296/399 [00:03<00:00, 124.87it/s]Loading weights:  84%|████████▎ | 334/399 [00:03<00:00, 150.67it/s]Loading weights:  85%|████████▍ | 339/399 [00:03<00:00, 145.23it/s]Loading weights:  85%|████████▍ | 339/399 [00:03<00:00, 149.87it/s]Loading weights:  91%|█████████ | 363/399 [00:03<00:00, 116.93it/s]Loading weights:  86%|████████▋ | 345/399 [00:03<00:00, 130.17it/s]Loading weights:  78%|███████▊  | 312/399 [00:03<00:00, 128.29it/s]Loading weights:  78%|███████▊  | 312/399 [00:03<00:00, 129.87it/s]Loading weights:  86%|████████▋ | 345/399 [00:03<00:00, 130.54it/s]Loading weights:  88%|████████▊ | 350/399 [00:03<00:00, 150.80it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 144.12it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 150.14it/s]Loading weights:  94%|█████████▍| 376/399 [00:03<00:00, 117.90it/s]Loading weights:  90%|████████▉ | 359/399 [00:03<00:00, 126.55it/s]Loading weights:  90%|████████▉ | 359/399 [00:03<00:00, 123.58it/s]Loading weights:  82%|████████▏ | 326/399 [00:03<00:00, 121.04it/s]Loading weights:  82%|████████▏ | 326/399 [00:03<00:00, 119.98it/s]Loading weights:  92%|█████████▏| 367/399 [00:03<00:00, 153.05it/s]Loading weights:  93%|█████████▎| 372/399 [00:03<00:00, 144.06it/s]Loading weights:  93%|█████████▎| 371/399 [00:03<00:00, 120.14it/s]Loading weights:  93%|█████████▎| 373/399 [00:03<00:00, 117.39it/s]Loading weights:  93%|█████████▎| 373/399 [00:03<00:00, 117.26it/s]Loading weights:  85%|████████▍ | 339/399 [00:03<00:00, 114.63it/s]Loading weights:  85%|████████▍ | 339/399 [00:03<00:00, 111.46it/s]Loading weights:  97%|█████████▋| 389/399 [00:03<00:00, 95.82it/s] Loading weights:  96%|█████████▌| 383/399 [00:03<00:00, 125.46it/s]Loading weights:  96%|█████████▌| 384/399 [00:03<00:00, 121.44it/s]Loading weights:  97%|█████████▋| 387/399 [00:03<00:00, 122.30it/s]Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 125.92it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 115.80it/s]
+Loading weights:  89%|████████▉ | 356/399 [00:03<00:00, 124.33it/s]Loading weights:  97%|█████████▋| 389/399 [00:03<00:00, 121.86it/s]Loading weights:  97%|█████████▋| 389/399 [00:03<00:00, 121.67it/s]Loading weights:  99%|█████████▉| 397/399 [00:03<00:00, 124.28it/s]Loading weights:  99%|█████████▉| 397/399 [00:03<00:00, 121.80it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 110.93it/s]
+Loading weights: 100%|██████████| 399/399 [00:03<00:00, 110.24it/s]
+Loading weights: 100%|██████████| 399/399 [00:03<00:00, 110.24it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 110.24it/s]
+
+Loading weights: 100%|██████████| 399/399 [00:03<00:00, 110.22it/s]
+Loading weights:  92%|█████████▏| 369/399 [00:03<00:00, 124.97it/s]Loading weights:  92%|█████████▏| 369/399 [00:03<00:00, 125.60it/s]Loading weights:  97%|█████████▋| 389/399 [00:03<00:00, 145.77it/s]Loading weights:  97%|█████████▋| 389/399 [00:03<00:00, 144.75it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 105.43it/s]Loading weights: 100%|██████████| 399/399 [00:03<00:00, 105.16it/s]
+
+Embedding mean: 1.508e-05, std: 2.209e-02
+Downloading readme:   0%|          | 0.00/5.46k [00:00<?, ?B/s]Downloading readme: 100%|██████████| 5.46k/5.46k [00:00<00:00, 11.3kB/s]Downloading readme: 100%|██████████| 5.46k/5.46k [00:00<00:00, 11.2kB/s]
+Downloading data:   0%|          | 0.00/166M [00:00<?, ?B/s]Downloading data:   6%|▋         | 10.5M/166M [00:02<00:35, 4.40MB/s]Downloading data:  13%|█▎        | 21.0M/166M [00:03<00:26, 5.44MB/s]Downloading data:  19%|█▉        | 31.5M/166M [00:07<00:34, 3.92MB/s]Downloading data:  25%|██▌       | 41.9M/166M [00:11<00:35, 3.52MB/s]Downloading data:  32%|███▏      | 52.4M/166M [00:14<00:35, 3.18MB/s]Downloading data:  38%|███▊      | 62.9M/166M [00:19<00:37, 2.75MB/s]Downloading data:  44%|████▍     | 73.4M/166M [00:22<00:32, 2.88MB/s]Downloading data:  51%|█████     | 83.9M/166M [00:29<00:35, 2.31MB/s]Downloading data:  57%|█████▋    | 94.4M/166M [00:36<00:35, 2.03MB/s]Downloading data:  63%|██████▎   | 105M/166M [00:45<00:38, 1.59MB/s] Downloading data:  70%|██████▉   | 115M/166M [00:48<00:26, 1.93MB/s]Downloading data:  76%|███████▌  | 126M/166M [00:50<00:16, 2.36MB/s]Downloading data:  82%|████████▏ | 136M/166M [00:53<00:10, 2.71MB/s]Downloading data:  89%|████████▊ | 147M/166M [00:58<00:07, 2.44MB/s]Downloading data:  95%|█████████▍| 157M/166M [01:01<00:03, 2.70MB/s]Downloading data: 100%|██████████| 166M/166M [01:03<00:00, 2.88MB/s]Downloading data: 100%|██████████| 166M/166M [01:03<00:00, 2.59MB/s]
+Downloading data:   0%|          | 0.00/165M [00:00<?, ?B/s]Downloading data:   6%|▋         | 10.5M/165M [00:02<00:34, 4.49MB/s]Downloading data:  13%|█▎        | 21.0M/165M [00:03<00:22, 6.43MB/s]Downloading data:  19%|█▉        | 31.5M/165M [00:05<00:25, 5.16MB/s]Downloading data:  25%|██▌       | 41.9M/165M [00:08<00:27, 4.43MB/s]Downloading data:  32%|███▏      | 52.4M/165M [00:10<00:23, 4.78MB/s]Downloading data:  38%|███▊      | 62.9M/165M [00:14<00:27, 3.70MB/s]Downloading data:  45%|████▍     | 73.4M/165M [00:20<00:31, 2.87MB/s]Downloading data:  51%|█████     | 83.9M/165M [00:26<00:33, 2.40MB/s]Downloading data:  57%|█████▋    | 94.4M/165M [00:34<00:36, 1.91MB/s]Downloading data:  64%|██████▎   | 105M/165M [00:39<00:31, 1.91MB/s] Downloading data:  70%|██████▉   | 115M/165M [00:40<00:19, 2.55MB/s]Downloading data:  76%|███████▋  | 126M/165M [00:42<00:12, 3.05MB/s]Downloading data:  83%|████████▎ | 136M/165M [00:45<00:08, 3.26MB/s]Downloading data:  89%|████████▉ | 147M/165M [00:48<00:05, 3.29MB/s]Downloading data:  95%|█████████▌| 157M/165M [00:50<00:02, 3.50MB/s]Downloading data: 100%|██████████| 165M/165M [00:52<00:00, 3.57MB/s]Downloading data: 100%|██████████| 165M/165M [00:52<00:00, 3.12MB/s]
+Downloading data:   0%|          | 0.00/29.5M [00:00<?, ?B/s]Downloading data:  36%|███▌      | 10.5M/29.5M [00:02<00:04, 4.48MB/s]Downloading data:  71%|███████   | 21.0M/29.5M [00:03<00:01, 7.05MB/s]Downloading data: 100%|██████████| 29.5M/29.5M [00:04<00:00, 6.50MB/s]Downloading data: 100%|██████████| 29.5M/29.5M [00:04<00:00, 6.26MB/s]
+Downloading data:   0%|          | 0.00/28.0M [00:00<?, ?B/s]Downloading data:  38%|███▊      | 10.5M/28.0M [00:02<00:03, 4.56MB/s]Downloading data:  75%|███████▌  | 21.0M/28.0M [00:03<00:01, 6.15MB/s]Downloading data: 100%|██████████| 28.0M/28.0M [00:04<00:00, 6.00MB/s]Downloading data: 100%|██████████| 28.0M/28.0M [00:04<00:00, 5.80MB/s]
+Generating train split:   0%|          | 0/167454 [00:00<?, ? examples/s]Generating train split:   5%|▍         | 8000/167454 [00:00<00:02, 69847.88 examples/s]Generating train split:  11%|█         | 18000/167454 [00:00<00:01, 83966.05 examples/s]Generating train split:  17%|█▋        | 28000/167454 [00:00<00:01, 88707.32 examples/s]Generating train split:  23%|██▎       | 38000/167454 [00:00<00:01, 91328.76 examples/s]Generating train split:  29%|██▊       | 48000/167454 [00:00<00:01, 93362.31 examples/s]Generating train split:  35%|███▍      | 58000/167454 [00:00<00:01, 94114.98 examples/s]Generating train split:  41%|████      | 68000/167454 [00:00<00:01, 94534.60 examples/s]Generating train split:  47%|████▋     | 78000/167454 [00:00<00:00, 94711.90 examples/s]Generating train split:  52%|█████▏    | 87727/167454 [00:00<00:00, 93315.17 examples/s]Generating train split:  58%|█████▊    | 97727/167454 [00:01<00:00, 94226.63 examples/s]Generating train split:  64%|██████▍   | 107727/167454 [00:01<00:00, 93973.38 examples/s]Generating train split:  70%|███████   | 117727/167454 [00:01<00:00, 94242.46 examples/s]Generating train split:  76%|███████▋  | 127727/167454 [00:01<00:00, 77445.76 examples/s]Generating train split:  82%|████████▏ | 137727/167454 [00:01<00:00, 81298.44 examples/s]Generating train split:  88%|████████▊ | 147727/167454 [00:01<00:00, 84712.45 examples/s]Generating train split:  94%|█████████▍| 157727/167454 [00:01<00:00, 87240.60 examples/s]Generating train split: 100%|██████████| 167454/167454 [00:01<00:00, 89238.47 examples/s]Generating train split: 100%|██████████| 167454/167454 [00:01<00:00, 86786.27 examples/s]
+Generating validation split:   0%|          | 0/12576 [00:00<?, ? examples/s]Generating validation split:  72%|███████▏  | 9000/12576 [00:00<00:00, 80273.93 examples/s]Generating validation split: 100%|██████████| 12576/12576 [00:00<00:00, 59950.77 examples/s]
+Generating test split:   0%|          | 0/12576 [00:00<?, ? examples/s]Generating test split:  80%|███████▉  | 10000/12576 [00:00<00:00, 88573.38 examples/s]Generating test split: 100%|██████████| 12576/12576 [00:00<00:00, 80085.58 examples/s]
+Total training samples: 1024
+**************************************************
+Training input length statistics (tokens):
+  full input per sample: mean=869.80, median=778, p90=1324, p95=1543, min=259, max=3121
+--------------------------------------------------
+  all documents per sample: mean=809.22, median=715, p90=1263, p95=1488, min=202, max=3056
+--------------------------------------------------
+  individual document: mean=80.92, median=49, p90=170, p95=289, min=5, max=1079
+--------------------------------------------------
+  document count per sample: mean=10.00, median=10, p90=10, p95=10, min=10, max=10
+--------------------------------------------------
+  KVPacket context per sample: mean=1032.04, median=938, p90=1486, p95=1705, min=420, max=3281
+**************************************************
+Loaded generation cache from ./generation_cache/qwen_3_8b/2wikimultihopqa/8_8_1024samples_1024maxtokens.disk.pt, size: 1024
+W0625 17:49:52.689000 4932 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 5061 closing signal SIGTERM
+W0625 17:49:52.691000 4932 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 5062 closing signal SIGTERM
+W0625 17:49:52.692000 4932 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 5063 closing signal SIGTERM
+W0625 17:49:52.693000 4932 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 5064 closing signal SIGTERM
+W0625 17:49:52.693000 4932 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 5065 closing signal SIGTERM
+W0625 17:49:52.694000 4932 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 5066 closing signal SIGTERM
+W0625 17:49:52.694000 4932 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:1010] Sending process 5067 closing signal SIGTERM
+E0625 17:49:53.725000 4932 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:984] failed (exitcode: -9) local_rank: 7 (pid: 5068) of binary: /data/ldeng/code/kvbridge/KVPacket/.venv/bin/python3
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/run.py", line 995, in <module>
+    main()
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/run.py", line 991, in main
+    run(args)
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/run.py", line 982, in run
+    elastic_launch(
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 170, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/ldeng/code/kvbridge/KVPacket/.venv/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 317, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+run_train_filler_with_parallel.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-06-25_17:49:53
+  host      : dedicated-developjob-kvbridge-hykdo-594794bf9d-2qn6d
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 5061)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 5061
+[2]:
+  time      : 2026-06-25_17:49:53
+  host      : dedicated-developjob-kvbridge-hykdo-594794bf9d-2qn6d
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 5062)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 5062
+[3]:
+  time      : 2026-06-25_17:49:53
+  host      : dedicated-developjob-kvbridge-hykdo-594794bf9d-2qn6d
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 5063)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 5063
+[4]:
+  time      : 2026-06-25_17:49:53
+  host      : dedicated-developjob-kvbridge-hykdo-594794bf9d-2qn6d
+  rank      : 3 (local_rank: 3)
+  exitcode  : -15 (pid: 5064)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 5064
+[5]:
+  time      : 2026-06-25_17:49:53
+  host      : dedicated-developjob-kvbridge-hykdo-594794bf9d-2qn6d
+  rank      : 4 (local_rank: 4)
+  exitcode  : -15 (pid: 5065)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 5065
+[6]:
+  time      : 2026-06-25_17:49:53
+  host      : dedicated-developjob-kvbridge-hykdo-594794bf9d-2qn6d
+  rank      : 5 (local_rank: 5)
+  exitcode  : -15 (pid: 5066)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 5066
+[7]:
+  time      : 2026-06-25_17:49:53
+  host      : dedicated-developjob-kvbridge-hykdo-594794bf9d-2qn6d
+  rank      : 6 (local_rank: 6)
+  exitcode  : -15 (pid: 5067)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 5067
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-06-25_17:49:52
+  host      : dedicated-developjob-kvbridge-hykdo-594794bf9d-2qn6d
+  rank      : 7 (local_rank: 7)
+  exitcode  : -9 (pid: 5068)
+  error_file: <N/A>
+  traceback : Signal 9 (SIGKILL) received by PID 5068
+============================================================
