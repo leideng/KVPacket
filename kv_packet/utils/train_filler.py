@@ -586,7 +586,7 @@ def build_generation_cache(
     # 仅用于区分多 rank 日志，不改变缓存内容。
     log_prefix: str = "",
 ) -> GenerationCache:
-
+    """Generate and cache model outputs. Idempotent: only missing samples are generated."""
     # 如果调用时候没有传入缓存，就创建一个新的内存缓存
     # disk 模式下通常由外部传入
     if generation_cache is None:
